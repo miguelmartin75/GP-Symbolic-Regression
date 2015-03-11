@@ -10,32 +10,32 @@ struct Point
     int y;
 };
 
-bool operator<(const Point& p1, const Point& p2)
+inline bool operator<(const Point& p1, const Point& p2)
 {
     return p1.x < p2.x && p2.y < p2.y;
 }
 
-bool operator>=(const Point& p1, const Point& p2)
+inline bool operator>=(const Point& p1, const Point& p2)
 {
     return !operator<(p1, p2);
 }
 
-bool operator<=(const Point& p1, const Point& p2)
+inline bool operator<=(const Point& p1, const Point& p2)
 {
     return !operator<(p2, p1);
 }
 
-bool operator>(const Point& p1, const Point& p2)
+inline bool operator>(const Point& p1, const Point& p2)
 {
     return !operator<=(p1, p2);
 }
 
-bool operator==(const Point& p1, const Point& p2)
+inline bool operator==(const Point& p1, const Point& p2)
 {
     return p1.x == p2.x && p2.y == p2.y;
 }
 
-bool operator!=(const Point& p1, const Point& p2)
+inline bool operator!=(const Point& p1, const Point& p2)
 {
     return !operator==(p1, p2);
 }

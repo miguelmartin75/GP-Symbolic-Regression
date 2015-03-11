@@ -37,7 +37,8 @@ int main(int argc, char *argv[])
     SymbolicRegressionSolver solver(config, points);
     Solution solution = solver.solve();
 
-    std::cout << "solved function: " << solution.function() << '\n';
+    std::cout << "function: " << solution.function << '\n';
+    std::cout << "fitness: " << solution.fitnessLevel << '\n';
     
     return 0;
 }
