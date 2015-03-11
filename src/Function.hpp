@@ -1,8 +1,8 @@
 #ifndef FUNCTION_HPP
 #define FUNCTION_HPP
 
-#include "Node.hpp"
-#include "Parser.hpp"
+#include "lang/Node.hpp"
+#include "lang/Parser.hpp"
 
 class Function
 {

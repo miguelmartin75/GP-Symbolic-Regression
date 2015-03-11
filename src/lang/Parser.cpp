@@ -1,12 +1,14 @@
 #include "Parser.hpp"
 
-#include "Lexer.hpp"
-#include "Node.hpp"
-#include "string_utils.hpp"
-
 #include <iostream>
 #include <stack>
 #include <queue>
+
+#include "Lexer.hpp"
+#include "Node.hpp"
+
+#include "../string_utils.hpp"
+
 
 enum class NodeType
 {

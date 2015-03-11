@@ -4,8 +4,9 @@
 #include <memory>
 #include <utility>
 
+#include "../Assert.hpp"
+
 #include "Operator.hpp"
-#include "Assert.hpp"
 #include "Variable.hpp"
 
 struct Node
