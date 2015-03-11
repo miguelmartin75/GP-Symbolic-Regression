@@ -24,5 +24,4 @@
 Function mutate(const Function& fn);
 Function mate(const Function& p1, const Function& p2);
 
-
 #endif // GENETICOPERATIONS_HPP

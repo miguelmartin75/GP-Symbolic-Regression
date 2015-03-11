@@ -9,6 +9,13 @@
 
 struct Solution
 {
+    // TODO: remove -1 
+    Solution(Function function, int fitnessLevel = -1) :
+        function(function),
+        fitnessLevel(fitnessLevel)
+    {
+    }
+
     Function function;
     int fitnessLevel;
 };

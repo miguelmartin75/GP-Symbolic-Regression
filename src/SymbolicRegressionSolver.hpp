@@ -19,9 +19,12 @@ public:
         int maxGenerations = 100;
         int initialMaxDepth = 5;
         int maxSolutionDepth = 50;
-        float crossoverPercent = 0.45f;
+
+        // if these two numbers do not add up to 1.0
+        // then it is assumed that we will duplicate for the rest of it
+        float matePercent = 0.45f;
         float mutationPercent = 0.45f;
-        float duplicationPercent = 1.0f - crossoverPercent + mutationPercent;
+
 
         // max/min random co-efficients
         bool useMaxMinRandom = true;
@@ -37,19 +40,22 @@ public:
 
 private:
 
+    using SolutionList = std::vector<Solution>;
+    using RandomEngine = std::default_random_engine;
+
     void populate();
-    void performGeneticOperations();
+    SolutionList performGeneticOperations();
     Solution randomlyGenerateSolution();
-    void computeFitness();
-    int fitness(Function& fn) const;
-    Solution createSolution(Function& fn) const; 
+    void updateFitnesses();
+    int fitness(Function fn) const;
+    Solution createSolution(Function fn) const; 
     
     Config m_config;
     PointList m_points;
-    std::vector<Solution> m_solutions;
+    SolutionList m_solutions;
 
     std::random_device m_randomDevice;
-    std::default_random_engine m_randomEngine;
+    RandomEngine m_randomEngine;
     std::uniform_int_distribution<int> m_randomDist;
 };
 

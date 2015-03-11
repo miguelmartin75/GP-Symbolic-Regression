@@ -30,8 +30,46 @@ Solution SymbolicRegressionSolver::solve()
     // pick the best 10% or w/e
     //m_solutions.erase(std::remove(m_solutions.begin(), m_solutions.end() + (m_solutions.size() * 0.10), m_solutions.end()));
 
-    performGeneticOperations();
+    m_solutions = performGeneticOperations();
     return Solution{Function{"(+ 3 2)"}};
+}
+
+SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticOperations()
+{
+    SolutionList newSolutions;
+    newSolutions.reserve(m_solutions.size());
+
+    std::vector<Function*> matingList;
+
+    /*
+    RandomEngine engine(m_randomDevice);
+    std::uniform_real_distribution<> dist(0, 1);
+
+    for(auto& solution : m_solutions)
+    {
+        auto randomNumber = dist(engine);
+        if(randomNumber <= m_config.mutationPercent)
+        {
+            newSolutions.emplace_back(createSolution(mutate(solution.function)));
+        }
+        else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
+        {
+            if(matingList.size() == 2)
+            {
+                newSolutions.emplace_back(createSolution(mate(*matingList[0], *matingList[1])));
+            }
+
+            matingList.emplace_back(&solution.function);
+        }
+        // duplicate
+        else
+        {
+            newSolutions.emplace_back(solution);
+        }
+    }
+    */
+
+    return newSolutions;
 }
 
 void SymbolicRegressionSolver::populate()
@@ -42,13 +80,7 @@ void SymbolicRegressionSolver::populate()
     }
 }
 
-void SymbolicRegressionSolver::performGeneticOperations()
-{
-    // TODO
-}
-
-// TODO: do I really need this? Lol
-void SymbolicRegressionSolver::computeFitness()
+void SymbolicRegressionSolver::updateFitnesses()
 {
     for(auto& solution : m_solutions)
     {
@@ -56,7 +88,7 @@ void SymbolicRegressionSolver::computeFitness()
     }
 }
 
-int SymbolicRegressionSolver::fitness(Function& fn) const
+int SymbolicRegressionSolver::fitness(Function fn) const
 {
     int result = m_points.size();
     for(auto& p : m_points)
@@ -69,12 +101,12 @@ int SymbolicRegressionSolver::fitness(Function& fn) const
     return result;
 }
 
+Solution SymbolicRegressionSolver::createSolution(Function fn) const
+{
+    return Solution{fn, fitness(fn)};
+}
+
 Solution SymbolicRegressionSolver::randomlyGenerateSolution()
 {
     return Solution{Function{"TODO"}};
-}
-
-Solution SymbolicRegressionSolver::createSolution(Function& fn) const
-{
-    return Solution{fn, fitness(fn)};
 }
