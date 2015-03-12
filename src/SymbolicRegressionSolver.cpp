@@ -55,6 +55,7 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
             if(matingList.size() == 2)
             {
                 newSolutions.emplace_back(createSolution(mate(*matingList[0], *matingList[1])));
+                matingList.clear();
             }
 
             matingList.emplace_back(&solution.function);
