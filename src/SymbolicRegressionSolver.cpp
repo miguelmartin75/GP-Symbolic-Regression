@@ -40,9 +40,7 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
     newSolutions.reserve(m_solutions.size());
 
     std::vector<Function*> matingList;
-
-    /*
-    RandomEngine engine(m_randomDevice);
+    RandomEngine engine(m_randomDevice());
     std::uniform_real_distribution<> dist(0, 1);
 
     for(auto& solution : m_solutions)
@@ -67,7 +65,6 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
             newSolutions.emplace_back(solution);
         }
     }
-    */
 
     return newSolutions;
 }
