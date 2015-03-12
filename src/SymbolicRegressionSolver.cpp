@@ -20,15 +20,13 @@ Solution SymbolicRegressionSolver::solve()
 {
     populate();
 
-    /*
     std::sort(m_solutions.begin(), m_solutions.end(), 
-     [](const Solution& s1, const Solution& s2)
+     [](const Solution& s1, const Solution& s2) -> bool
      {
+        return s1.fitnessLevel < s2.fitnessLevel;
      });
-     */
 
-    // pick the best 10% or w/e
-    //m_solutions.erase(std::remove(m_solutions.begin(), m_solutions.end() + (m_solutions.size() * 0.10), m_solutions.end()));
+    m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * (1.0 - m_config.removePercent)), m_solutions.end());
 
     m_solutions = performGeneticOperations();
     return Solution{Function{"(+ 3 2)"}};

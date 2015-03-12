@@ -20,6 +20,8 @@ public:
         int initialMaxDepth = 5;
         int maxSolutionDepth = 50;
 
+        float removePercent = 0.9f;
+
         // if these two numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
         float matePercent = 0.45f;
