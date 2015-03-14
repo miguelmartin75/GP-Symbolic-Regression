@@ -8,7 +8,7 @@ enum class Operator
     ADD,
     SUBTRACT,
     MULTIPLY,
-    DIVIDE,
+    //DIVIDE,
     DIVIDE_SAFE,
 
     // TODO:

@@ -6,7 +6,7 @@ static const std::function<int(int, int)> FUNCTION_MAP[] =
     { [](int x1, int x2) -> int { return x1 + x2; } },
     { [](int x1, int x2) -> int { return x1 - x2; } },
     { [](int x1, int x2) -> int { return x1 * x2; } },
-    { [](int x1, int x2) -> int { return x1 / x2; } },
+    //{ [](int x1, int x2) -> int { return x1 / x2; } },
     { [](int x1, int x2) -> int { return x2 == 0 ? 0 : x1 / x2; } },
 };
 
@@ -39,10 +39,11 @@ std::istream& operator>>(std::istream& in, Operator& op)
                 {
                     op = Operator::DIVIDE_SAFE;
                 }
+                /*
                 else
                 {
                     op = Operator::DIVIDE;
-                }
+                }*/
             }
             break;
         default:

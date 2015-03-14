@@ -55,21 +55,23 @@ int node_count(const NodePtr& node)
 
 Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist)
 {
-    static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT);
+    static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
 
     const int NODE_COUNT = node_count(fn.getNode());
-    const int DEPTH_OF_AST = depth(fn.getNode());
     const int amountOfNodesToChange = std::uniform_int_distribution<>(1, NODE_COUNT)(engine);
 
     std::vector<int> nodesToChange(amountOfNodesToChange, -1);
     std::uniform_int_distribution<> dist(0, NODE_COUNT);
     for(auto node : nodesToChange)
     {
-        do 
+        int newNode;
+        do
         {
-            // randomly generate a UNIQUE node to change
-            node = dist(engine);
-        } while (std::find(nodesToChange.begin(), nodesToChange.end(), node) == std::end(nodesToChange));
+            newNode = dist(engine);
+        }
+        while (std::find(nodesToChange.begin(), nodesToChange.end(), node) == std::end(nodesToChange));
+        
+        node = newNode;
     }
 
     int currentNode = -1;
@@ -85,21 +87,23 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                 // now we shall actually mutate the node
                 switch(node->type())
                 {
-                // change the operator type
-                case Node::Type::OPERATION:
-                    static_cast<OperatorNode*>(node.get())->op = static_cast<Operator>(operatorDist(engine));
+                    // change the operator type
+                    case Node::Type::OPERATION:
+                        static_cast<OperatorNode*>(node.get())->op = static_cast<Operator>(operatorDist(engine));
+                        break;
+                    case Node::Type::VALUE:
+                        static_cast<ValueNode*>(node.get())->value = constantDist(engine);
+                        break;
+                    case Node::Type::VARIABLE:
+                        // change the variable to a constant? TODO
+                        // maybe make this a bool flag. Also ISSUE:
+                        // since I'm using shared_ptr's it's not guaranteed to
+                        // actually delete the reference. So in that sense,
+                        // we should be using unique_ptr's for the nodes. Since
+                        // I know that no one else is going to be holding the Node.
                     break;
-                case Node::Type::VALUE:
-                    static_cast<ValueNode*>(node.get())->value = constantDist(engine);
-                    break;
-                case Node::Type::VARIABLE:
-                    // change the variable to a constant? TODO
-                    // maybe make this a bool flag. Also ISSUE:
-                    // since I'm using shared_ptr's it's not guaranteed to 
-                    // actually delete the reference. So in that sense, 
-                    // we should be using unique_ptr's for the nodes. Since
-                    // I know that no one else is going to be holding the Node.
-                    break;
+                    default:
+                        break;
                 }
             });
     return fn;

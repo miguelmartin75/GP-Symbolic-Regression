@@ -8,6 +8,11 @@ class Function
 {
 public:
 
+    Function() :
+        m_variableName("x")
+    {
+    }
+
     Function(NodePtr node, const std::string& variableName = "x") :
         m_variableName(variableName)
     {

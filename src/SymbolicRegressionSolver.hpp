@@ -9,6 +9,7 @@
 #include "random_utils.hpp"
 
 using PointList = std::vector<Point>;
+using SolutionList = std::vector<Solution>;
 
 class SymbolicRegressionSolver
 {
@@ -16,18 +17,19 @@ public:
 
     struct Config
     {
-        int initialPopulation = 500;
-        int maxGenerations = 100;
-        int initialMaxDepth = 5;
+        int initialPopulation = 1000;
+        int maxGenerations = 200;
+        int initialMaxDepth = 10;
         int maxSolutionDepth = 50;
 
-        float removePercent = 0.9f;
+        // TODO: random removes ? in the top %x? 
+        float removePercent = 0.4f;
 
         // if these two numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
-        float matePercent = 0.45f;
-        float mutationPercent = 0.45f;
-
+        float mutationPercent = 0.7f;
+        //float matePercent = 0.45f;
+        
 
         // max/min random co-efficients
         bool useMaxMinRandom = true;
@@ -39,11 +41,9 @@ public:
 
     SymbolicRegressionSolver(const Config& config, const PointList& points);
 
-    Solution solve();
+    SolutionList solve();
 
 private:
-
-    using SolutionList = std::vector<Solution>;
 
     void populate();
     SolutionList performGeneticOperations();

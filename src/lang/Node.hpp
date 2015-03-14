@@ -15,7 +15,8 @@ struct Node
     {
         VALUE,
         VARIABLE,
-        OPERATION
+        OPERATION,
+        COUNT
     };
 
     virtual Type type() const = 0;

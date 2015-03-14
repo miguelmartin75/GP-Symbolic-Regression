@@ -16,23 +16,42 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
     }
 }
 
-Solution SymbolicRegressionSolver::solve()
+SolutionList SymbolicRegressionSolver::solve()
 {
+    std::cout << "populating shit\n";
     populate();
 
-    std::sort(m_solutions.begin(), m_solutions.end(), 
-     [](const Solution& s1, const Solution& s2) -> bool
-     {
-        return s1.fitnessLevel < s2.fitnessLevel;
-     });
+    for(int i = 0; i < m_config.maxGenerations && m_solutions.size() != 0; ++i)
+    {
+        std::sort(m_solutions.begin(), m_solutions.end(),
+         [](const Solution& s1, const Solution& s2) -> bool
+         {
+            return s1.fitnessLevel < s2.fitnessLevel;
+         });
+        
+        std::cout << "Best solution for generation " << i << " is: ";
+        std::cout << m_solutions[0].function;
+        std::cout << " [fitness = " << m_solutions[0].fitnessLevel << "]\n";
+        if(m_solutions[0].fitnessLevel == m_config.solutionCriterea)
+        {
+            m_solutions.erase(std::remove_if(m_solutions.begin(),
+                                             m_solutions.end(),
+                                             [&](const Solution& sol) -> bool
+                                             {
+                                                return sol.fitnessLevel != m_config.solutionCriterea;
+                                             }), m_solutions.end());
+            break;
+        }
 
-    m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * (1.0 - m_config.removePercent)), m_solutions.end());
+        m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * (1.0 - m_config.removePercent)), m_solutions.end());
 
-    m_solutions = performGeneticOperations();
-    return Solution{Function{"(+ 3 2)"}}; // TODO
+        m_solutions = performGeneticOperations();
+    }
+
+    return m_solutions;
 }
 
-SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticOperations()
+SolutionList SymbolicRegressionSolver::performGeneticOperations()
 {
     SolutionList newSolutions;
     newSolutions.reserve(m_solutions.size());
@@ -48,6 +67,7 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
         {
             newSolutions.emplace_back(createSolution(mutate(m_randomEngine, solution.function, m_constantDist)));
         }
+        /*
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
             if(matingList.size() == 2)
@@ -58,6 +78,7 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
 
             matingList.emplace_back(&solution.function);
         }
+        */
         // duplicate
         else
         {
@@ -86,7 +107,7 @@ void SymbolicRegressionSolver::updateFitnesses()
 
 int SymbolicRegressionSolver::fitness(Function fn) const
 {
-    int result = m_points.size();
+    int result = (int)m_points.size();
     for(auto& p : m_points)
     {
         if(p.y == fn(p.x))
@@ -102,7 +123,40 @@ Solution SymbolicRegressionSolver::createSolution(Function fn) const
     return Solution{fn, fitness(fn)};
 }
 
+NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<>& constantDist)
+{
+    static std::uniform_int_distribution<> binaryDist(0, 1);
+    static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
+    Node::Type typeToGenerate = Node::Type::OPERATION;
+    if(depth == 0)
+    {
+        typeToGenerate = binaryDist(engine) == 0 ? Node::Type::VALUE : Node::Type::VARIABLE;
+    }
+
+    switch(typeToGenerate)
+    {
+        case Node::Type::VARIABLE:
+            return node<VariableNode>("x"); 
+        case Node::Type::VALUE:
+            return node<ValueNode>(constantDist(engine));
+        case Node::Type::OPERATION:
+            {
+                return node<OperatorNode>(static_cast<Operator>(operatorDist(engine)),
+                                           generate(engine, depth - 1, constantDist),
+                                           generate(engine, depth - 1, constantDist));
+            }
+        default:
+            std::cerr << "Invalid type generated\n";
+            std::exit(1);
+            return nullptr;
+            break;
+    }
+}
+
 Solution SymbolicRegressionSolver::randomlyGenerateSolution()
 {
-    return Solution{Function{"TODO"}};
+    std::uniform_int_distribution<> dist(0, m_config.initialMaxDepth);
+    const int depthToGenerate = dist(m_randomEngine);
+    
+    return createSolution(Function{generate(m_randomEngine, depthToGenerate, m_constantDist)});
 }
