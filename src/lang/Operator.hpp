@@ -9,11 +9,14 @@ enum class Operator
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
-    DIVIDE_SAFE
+    DIVIDE_SAFE,
+
     // TODO:
     // cos, sin, etc.
     // and make it configurable to limit to a subset
     // of these operators
+
+    COUNT
 };
 
 int eval(int x1, int x2, Operator op);

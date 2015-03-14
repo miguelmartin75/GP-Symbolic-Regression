@@ -48,6 +48,11 @@ public:
         return m_parserResult.statement;
     }
 
+    NodePtr& getNode() 
+    {
+        return m_parserResult.statement;
+    }
+
 private:
 
     void parse(std::string text)

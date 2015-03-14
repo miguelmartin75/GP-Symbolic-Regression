@@ -2,6 +2,7 @@
 #define GENETICOPERATIONS_HPP
 
 #include "Function.hpp"
+#include "random_utils.hpp"
 
 /*
  * There are three major genetic operations that
@@ -21,7 +22,7 @@
  * Source: http://pages.ucsd.edu/~aerobins/genetic/div3.pdf
  */
 
-Function mutate(const Function& fn);
-Function mate(const Function& p1, const Function& p2);
+Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist);
+Function mate(RandomEngine& engine, const Function& p1, const Function& p2);
 
 #endif // GENETICOPERATIONS_HPP

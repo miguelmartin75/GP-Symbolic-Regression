@@ -12,7 +12,7 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
 {
     if(config.useMaxMinRandom)
     {
-        m_randomDist = decltype(m_randomDist)(config.minimumRandom, config.maximumRandom);
+        m_constantDist = decltype(m_constantDist)(config.minimumConstantValue, config.maximumConstantValue);
     }
 }
 
@@ -29,7 +29,7 @@ Solution SymbolicRegressionSolver::solve()
     m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * (1.0 - m_config.removePercent)), m_solutions.end());
 
     m_solutions = performGeneticOperations();
-    return Solution{Function{"(+ 3 2)"}};
+    return Solution{Function{"(+ 3 2)"}}; // TODO
 }
 
 SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticOperations()
@@ -46,13 +46,13 @@ SymbolicRegressionSolver::SolutionList SymbolicRegressionSolver::performGeneticO
         auto randomNumber = dist(engine);
         if(randomNumber <= m_config.mutationPercent)
         {
-            newSolutions.emplace_back(createSolution(mutate(solution.function)));
+            newSolutions.emplace_back(createSolution(mutate(m_randomEngine, solution.function, m_constantDist)));
         }
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
             if(matingList.size() == 2)
             {
-                newSolutions.emplace_back(createSolution(mate(*matingList[0], *matingList[1])));
+                newSolutions.emplace_back(createSolution(mate(m_randomEngine, *matingList[0], *matingList[1])));
                 matingList.clear();
             }
 

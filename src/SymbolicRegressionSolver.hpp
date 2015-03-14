@@ -2,10 +2,11 @@
 #define SYMBOLICREGRESSIONSOLVER_HPP
 
 #include <vector>
-#include <random>
 
 #include "Point.hpp"
 #include "Solution.hpp"
+
+#include "random_utils.hpp"
 
 using PointList = std::vector<Point>;
 
@@ -30,8 +31,8 @@ public:
 
         // max/min random co-efficients
         bool useMaxMinRandom = true;
-        int minimumRandom = -50;
-        int maximumRandom = 50;
+        int minimumConstantValue = -50;
+        int maximumConstantValue = 50;
         
         int solutionCriterea = 0; /* 0 means fully successful */
     };
@@ -43,7 +44,6 @@ public:
 private:
 
     using SolutionList = std::vector<Solution>;
-    using RandomEngine = std::default_random_engine;
 
     void populate();
     SolutionList performGeneticOperations();
@@ -58,7 +58,7 @@ private:
 
     std::random_device m_randomDevice;
     RandomEngine m_randomEngine;
-    std::uniform_int_distribution<int> m_randomDist;
+    std::uniform_int_distribution<int> m_constantDist;
 };
 
 #endif // SYMBOLICREGRESSIONSOLVER_HPP
