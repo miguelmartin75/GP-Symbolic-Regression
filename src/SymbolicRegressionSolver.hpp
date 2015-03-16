@@ -17,26 +17,27 @@ public:
 
     struct Config
     {
-        int initialPopulation = 1000;
-        int maxGenerations = 200;
-        int initialMaxDepth = 10;
-        int maxSolutionDepth = 50;
+        int initialPopulation = 1600;
+        int maxGenerations = 300;
+        int initialMaxDepth = 5;
+        int maxSolutionDepth = 20;
 
-        // TODO: random removes ? in the top %x? 
-        float removePercent = 0.4f;
+        // TODO: random removes from various positions
+        float keepPercentage = 0.90f;
 
-        // if these two numbers do not add up to 1.0
+        // if these three numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
-        float mutationPercent = 0.7f;
+        float mutationPercent = 0.9f;
         //float matePercent = 0.45f;
+        //float newGeneration = 0.2f;
         
 
         // max/min random co-efficients
         bool useMaxMinRandom = true;
-        int minimumConstantValue = -50;
-        int maximumConstantValue = 50;
+        int minimumConstantValue = 0;
+        int maximumConstantValue = 1000;
         
-        int solutionCriterea = 0; /* 0 means fully successful */
+        int solutionCriterea = 5; /* 0 means fully successful */
     };
 
     SymbolicRegressionSolver(const Config& config, const PointList& points);
@@ -49,7 +50,7 @@ private:
     SolutionList performGeneticOperations();
     Solution randomlyGenerateSolution();
     void updateFitnesses();
-    int fitness(Function fn) const;
+    size_t fitness(Function fn) const;
     Solution createSolution(Function fn) const; 
     
     Config m_config;

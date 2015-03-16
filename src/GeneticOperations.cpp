@@ -3,7 +3,7 @@
 #include "lang/Node.hpp"
 
 template <class F>
-void visit_const(const NodePtr& node, F f)
+void visit(const NodePtr& node, F f)
 {
     if(node->type() != Node::Type::OPERATION)
     {
@@ -12,8 +12,9 @@ void visit_const(const NodePtr& node, F f)
     }
 
     const OperatorNode& operatorNode = *static_cast<const OperatorNode*>(node.get());
-    f(operatorNode.left);
-    f(operatorNode.right);
+    f(node);
+    visit(operatorNode.left, f);
+    visit(operatorNode.right, f);
 }
 
 template <class F>
@@ -26,8 +27,9 @@ void visit(NodePtr& node, F f)
     }
 
     OperatorNode& operatorNode = *static_cast<OperatorNode*>(node.get());
-    f(operatorNode.left);
-    f(operatorNode.right);
+    f(node);
+    visit(operatorNode.left, f);
+    visit(operatorNode.right, f);
 }
 
 int depth(const NodePtr& node)
@@ -49,7 +51,7 @@ int depth(const NodePtr& node)
 int node_count(const NodePtr& node)
 {
     int count = 0;
-    visit_const(node, [&](const NodePtr&) { ++count; });
+    visit(node, [&](const NodePtr&) { ++count; });
     return count;
 }
 
@@ -62,7 +64,7 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
 
     std::vector<int> nodesToChange(amountOfNodesToChange, -1);
     std::uniform_int_distribution<> dist(0, NODE_COUNT);
-    for(auto node : nodesToChange)
+    for(auto& node : nodesToChange)
     {
         int newNode;
         do
@@ -92,7 +94,19 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                         static_cast<OperatorNode*>(node.get())->op = static_cast<Operator>(operatorDist(engine));
                         break;
                     case Node::Type::VALUE:
-                        static_cast<ValueNode*>(node.get())->value = constantDist(engine);
+                        {
+                            
+                            std::uniform_int_distribution<> temp(constantDist.param().a(), constantDist.param().b() + 1);
+                            auto number = temp(engine);
+                            if(number == constantDist.param().b() + 1)
+                            {
+                                node = ::node<VariableNode>("x");
+                            }
+                            else
+                            {
+                                static_cast<ValueNode*>(node.get())->value = constantDist(engine);
+                            }
+                        }
                         break;
                     case Node::Type::VARIABLE:
                         // change the variable to a constant? TODO
@@ -101,6 +115,7 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                         // actually delete the reference. So in that sense,
                         // we should be using unique_ptr's for the nodes. Since
                         // I know that no one else is going to be holding the Node.
+                        node = ::node<ValueNode>(constantDist(engine));
                     break;
                     default:
                         break;

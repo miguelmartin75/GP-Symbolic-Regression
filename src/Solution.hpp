@@ -10,14 +10,15 @@
 struct Solution
 {
     // TODO: remove -1 
-    Solution(Function function, int fitnessLevel = -1) :
+    Solution(Function function, size_t fitnessLevel) :
         function(function),
         fitnessLevel(fitnessLevel)
     {
     }
 
     Function function;
-    int fitnessLevel;
+    size_t fitnessLevel;
+    bool newSolution = true;
 };
 
 #endif // SOLUTION_HPP

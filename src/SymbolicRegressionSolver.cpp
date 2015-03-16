@@ -29,26 +29,26 @@ SolutionList SymbolicRegressionSolver::solve()
             return s1.fitnessLevel < s2.fitnessLevel;
          });
         
-        std::cout << "Best solution for generation " << i << " is: ";
+        std::cout << "Best solution for generation " << i + 1 << " is: ";
         std::cout << m_solutions[0].function;
         std::cout << " [fitness = " << m_solutions[0].fitnessLevel << "]\n";
-        if(m_solutions[0].fitnessLevel == m_config.solutionCriterea)
+        if(m_solutions[0].fitnessLevel <= m_config.solutionCriterea)
         {
             m_solutions.erase(std::remove_if(m_solutions.begin(),
                                              m_solutions.end(),
                                              [&](const Solution& sol) -> bool
                                              {
-                                                return sol.fitnessLevel != m_config.solutionCriterea;
+                                                return sol.fitnessLevel > m_config.solutionCriterea;
                                              }), m_solutions.end());
-            break;
+            return m_solutions;
         }
 
-        m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * (1.0 - m_config.removePercent)), m_solutions.end());
+        m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * m_config.keepPercentage), m_solutions.end());
 
         m_solutions = performGeneticOperations();
     }
 
-    return m_solutions;
+    return SolutionList();
 }
 
 SolutionList SymbolicRegressionSolver::performGeneticOperations()
@@ -65,7 +65,10 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         auto randomNumber = dist(engine);
         if(randomNumber <= m_config.mutationPercent)
         {
-            newSolutions.emplace_back(createSolution(mutate(m_randomEngine, solution.function, m_constantDist)));
+            mutate(m_randomEngine, solution.function, m_constantDist);
+            solution.fitnessLevel = fitness(solution.function);
+            solution.newSolution = false;
+            newSolutions.emplace_back(solution);
         }
         /*
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
@@ -79,11 +82,16 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
             matingList.emplace_back(&solution.function);
         }
         */
-        // duplicate
         else
         {
+            solution.newSolution = false;
             newSolutions.emplace_back(solution);
         }
+    }
+
+    for(size_t i = 0; i < m_config.initialPopulation - newSolutions.size(); ++i)
+    {
+        newSolutions.emplace_back(randomlyGenerateSolution());
     }
 
     return newSolutions;
@@ -105,15 +113,12 @@ void SymbolicRegressionSolver::updateFitnesses()
     }
 }
 
-int SymbolicRegressionSolver::fitness(Function fn) const
+size_t SymbolicRegressionSolver::fitness(Function fn) const
 {
-    int result = (int)m_points.size();
+    size_t result = 0;
     for(auto& p : m_points)
     {
-        if(p.y == fn(p.x))
-        {
-            --result; 
-        }
+        result += abs(p.y - fn(p.x));
     }
     return result;
 }
@@ -155,7 +160,7 @@ NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<
 
 Solution SymbolicRegressionSolver::randomlyGenerateSolution()
 {
-    std::uniform_int_distribution<> dist(0, m_config.initialMaxDepth);
+    std::uniform_int_distribution<> dist(1, m_config.initialMaxDepth);
     const int depthToGenerate = dist(m_randomEngine);
     
     return createSolution(Function{generate(m_randomEngine, depthToGenerate, m_constantDist)});

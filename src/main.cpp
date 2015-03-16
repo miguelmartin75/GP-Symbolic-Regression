@@ -8,10 +8,10 @@
 #include "string_utils.hpp"
 
 SymbolicRegressionSolver::Config config{};
-Function fn;
-int initialPoint;
-int endPoint;
-int stepSize;
+Function fn{"(* (* 5 x) (* 2 x))"};
+int initialPoint = 0;
+int endPoint = 10;
+int stepSize = 2;
 
 void parseArguments(int argc, char *argv[]);
 void printValidFlags()
@@ -25,12 +25,13 @@ void printValidFlags()
 
 int main(int argc, char *argv[])
 {
-    if(argc == 1)
+    /*
+     if(argc == 1)
     {
         std::cout << "pls, run this program with arguments\n";
         return -1;
     }
-
+     */
     parseArguments(argc, argv);
 
     std::cout << "function: " << fn << '\n';
@@ -67,6 +68,8 @@ int main(int argc, char *argv[])
         std::cout << "solution " << i + 1 << ":\n";
         std::cout << "\tfunction: " << solution.function << '\n';
         std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
+        std::cout << "\tnew?: " << solution.newSolution << '\n';
+
     }
 
     return 0;
