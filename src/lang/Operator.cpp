@@ -35,7 +35,7 @@ std::istream& operator>>(std::istream& in, Operator& op)
             break;
         case '/':
             {
-                if(buffer.size() >= 2 && buffer[1] == '/')
+                //if(buffer.size() >= 2 && buffer[1] == '/')
                 {
                     op = Operator::DIVIDE_SAFE;
                 }

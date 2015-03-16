@@ -36,15 +36,22 @@ LexerResult tokenize(std::string source)
             
             auto itToEndBracket = std::find(it, buffer.end(), ')');
             auto itToLogicalEnd = itToEndBracket == buffer.end() ? buffer.end() : itToEndBracket;
-            std::string text(it, itToLogicalEnd);
+            if(itToLogicalEnd == buffer.end())
+            {
+                bracketAccumulator--;
+            }
             
+            std::string text(it, itToLogicalEnd);
+
             if(std::isdigit(ch))
             {
                 tokens.emplace_back(Token::Type::NUMBER, text);
+                break;
             }
             else if(std::isalpha(ch))
             {
                 tokens.emplace_back(Token::Type::VARIABLE, text);
+                break;
             }
             else // operator
             {
