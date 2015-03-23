@@ -25,13 +25,6 @@ void printValidFlags()
 
 int main(int argc, char *argv[])
 {
-    /*
-     if(argc == 1)
-    {
-        std::cout << "pls, run this program with arguments\n";
-        return -1;
-    }
-     */
     parseArguments(argc, argv);
 
     std::cout << "function: " << fn << '\n';

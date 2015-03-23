@@ -20,11 +20,9 @@ struct Node
     };
 
     virtual Type type() const = 0;
-    
-private:
-
     virtual int eval(const VariableMap* map) const = 0;
-    friend int compute(Node&, const VariableMap*);
+
+private:
 };
 
 using NodePtr = std::shared_ptr<Node>;
@@ -48,13 +46,29 @@ struct ValueNode : public Node
         return Type::VALUE;
     }
 
-private:
-
     virtual int eval(const VariableMap* map) const override
     {
         return value;
     }
 };
+
+struct VariableNode : public Node
+{
+    Variable id;
+
+    VariableNode(const Variable& id) : id(id) {}
+
+    virtual Type type() const override
+    {
+        return Type::VARIABLE;
+    }
+
+    virtual int eval(const VariableMap* map) const override
+    {
+        return map != nullptr && map->find(id) == map->end() ? 0 : map->at(id);
+    }
+};
+
 
 struct OperatorNode : public Node
 {
@@ -72,38 +86,20 @@ struct OperatorNode : public Node
         return Type::OPERATION;
     }
 
-private:
-
     virtual int eval(const VariableMap* map) const override
     {
-        return ::eval(compute(*left, map), compute(*right, map), op); 
+        // special case for division and variable nodes. i.e. x/x == 1 for all x in real (including 0)
+        if(op == Operator::DIVIDE_SAFE)/*|| op == Operator::DIVIDE)*/
+        {
+            if(left->type() == Node::Type::VARIABLE && right->type() == Node::Type::VARIABLE &&
+               static_cast<VariableNode*>(left.get())->id == static_cast<VariableNode*>(right.get())->id)
+            {
+                return 1;
+            }
+        }
+
+        return ::eval(left->eval(map), right->eval(map), op); 
     }
 };
-
-struct VariableNode : public Node
-{
-    Variable id;
-
-    VariableNode(const Variable& id) : id(id) {}
-
-    virtual Type type() const override
-    {
-        return Type::VARIABLE;
-    }
-
-private:
-
-    virtual int eval(const VariableMap* map) const override
-    {
-        return map != nullptr && map->find(id) == map->end() ? 0 : map->at(id);
-    }
-};
-
-
-inline int compute(Node& node, const VariableMap* map)
-{
-    return node.eval(map);
-}
-
 
 #endif // NODE_HPP

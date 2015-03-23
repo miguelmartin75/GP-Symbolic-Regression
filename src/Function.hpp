@@ -28,7 +28,7 @@ public:
     int operator()(int variable) 
     {
         getVariableMap()[m_variableName] = variable;
-        return ::compute(*getNode(), &getVariableMap());
+        return getNode()->eval(&getVariableMap());
     }
 
     Function& operator=(const std::string& str)
