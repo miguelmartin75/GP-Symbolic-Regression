@@ -50,7 +50,7 @@ NodeData nextNode(TokenList::iterator begin, TokenList::iterator end, VariableMa
                 {
                     auto leftNodeData = nextNode(begin + 1, end, map);
                     auto rightNodeData = nextNode(leftNodeData.iteratorToGetNode + 1, end, map);
-                    return NodeData{node<OperatorNode>(util::from_string<Operator>(token.source), leftNodeData.node, rightNodeData.node),
+                    return NodeData{node<OperatorNode>(util::from_string<Operator>(token.source), std::move(leftNodeData.node), std::move(rightNodeData.node)),
                                     rightNodeData.iteratorToGetNode};
                 }
                 break;
@@ -74,6 +74,8 @@ NodeData nextNode(TokenList::iterator begin, TokenList::iterator end, VariableMa
 
 std::string nextNode(const NodePtr& node)
 {
+    if(!node) return "";
+    
     switch(node->type())
     {
         case Node::Type::OPERATION:

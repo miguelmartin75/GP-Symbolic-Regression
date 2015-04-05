@@ -18,7 +18,6 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
 
 SolutionList SymbolicRegressionSolver::solve()
 {
-    std::cout << "populating shit\n";
     populate();
 
     for(int i = 0; i < m_config.maxGenerations && m_solutions.size() != 0; ++i)
@@ -51,6 +50,9 @@ SolutionList SymbolicRegressionSolver::solve()
     return SolutionList();
 }
 
+
+std::ostream& os = std::cout;
+
 SolutionList SymbolicRegressionSolver::performGeneticOperations()
 {
     SolutionList newSolutions;
@@ -67,24 +69,37 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             mutate(m_randomEngine, solution.function, m_constantDist);
             solution.fitnessLevel = fitness(solution.function);
-            solution.newSolution = false;
+            solution.modified = true;
             newSolutions.emplace_back(solution);
         }
-        /*
+        
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
+            matingList.emplace_back(&solution.function);
             if(matingList.size() == 2)
             {
-                newSolutions.emplace_back(createSolution(mate(m_randomEngine, *matingList[0], *matingList[1])));
+                Solution sol = createSolution(mate(m_randomEngine, *matingList[0], *matingList[1], [&]()
+                {
+                    NodePtr node;
+                    std::uniform_int_distribution<> dist(0, 2);
+                    if(dist(engine) <= 1)
+                    {
+                        node = ::node<ValueNode>(m_constantDist(engine));
+                    }
+                    else
+                    {
+                        node = ::node<VariableNode>("x");
+                    }
+                    return node;
+                }, m_config.maxSolutionDepth));
+                sol.modified = true;
+                newSolutions.emplace_back(sol);
+
                 matingList.clear();
             }
-
-            matingList.emplace_back(&solution.function);
         }
-        */
         else
         {
-            solution.newSolution = false;
             newSolutions.emplace_back(solution);
         }
     }
@@ -113,7 +128,7 @@ void SymbolicRegressionSolver::updateFitnesses()
     }
 }
 
-size_t SymbolicRegressionSolver::fitness(Function fn) const
+size_t SymbolicRegressionSolver::fitness(Function& fn) const
 {
     size_t result = 0;
     for(auto& p : m_points)
@@ -125,7 +140,8 @@ size_t SymbolicRegressionSolver::fitness(Function fn) const
 
 Solution SymbolicRegressionSolver::createSolution(Function fn) const
 {
-    return Solution{fn, fitness(fn)};
+    auto fit = fitness(fn);
+    return Solution{std::move(fn), fit};
 }
 
 NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<>& constantDist)
@@ -141,14 +157,14 @@ NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<
     switch(typeToGenerate)
     {
         case Node::Type::VARIABLE:
-            return node<VariableNode>("x"); 
+            return node<VariableNode>("x");
         case Node::Type::VALUE:
             return node<ValueNode>(constantDist(engine));
         case Node::Type::OPERATION:
             {
                 return node<OperatorNode>(static_cast<Operator>(operatorDist(engine)),
-                                           generate(engine, depth - 1, constantDist),
-                                           generate(engine, depth - 1, constantDist));
+                                          std::move(generate(engine, depth - 1, constantDist)),
+                                          std::move(generate(engine, depth - 1, constantDist)));
             }
         default:
             std::cerr << "Invalid type generated\n";
@@ -163,5 +179,5 @@ Solution SymbolicRegressionSolver::randomlyGenerateSolution()
     std::uniform_int_distribution<> dist(1, m_config.initialMaxDepth);
     const int depthToGenerate = dist(m_randomEngine);
     
-    return createSolution(Function{generate(m_randomEngine, depthToGenerate, m_constantDist)});
+    return createSolution(std::move(Function{generate(m_randomEngine, depthToGenerate, m_constantDist)}));
 }

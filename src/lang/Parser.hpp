@@ -16,6 +16,43 @@
 
 struct ParseResult
 {
+    ParseResult() { }
+    
+    ParseResult(const ParseResult& p) :
+        statement(p.statement->clone()),
+        vars(p.vars)
+    {
+    }
+    
+    ParseResult& operator=(const ParseResult& p)
+    {
+        if(this != &p)
+        {
+            statement = p.statement->clone();
+            vars = p.vars;
+        }
+        return *this;
+    }
+    
+    ParseResult(ParseResult&& p) :
+        statement(std::move(p.statement)),
+        vars(std::move(p.vars))
+    {
+        
+    }
+    
+    ParseResult& operator=(ParseResult&& p)
+    {
+        if(this != &p)
+        {
+            statement = std::move(p.statement);
+            vars = std::move(p.vars);
+        }
+        return *this;
+    }
+
+    
+    
     NodePtr statement; // statement that was parsed
     VariableMap vars;  // the variables associated with the statement
 };

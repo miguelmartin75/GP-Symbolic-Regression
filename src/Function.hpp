@@ -24,6 +24,11 @@ public:
     {
         *this = source;
     }
+    
+    Function(const Function&) = default;
+    Function& operator=(const Function&) = default;
+    Function(Function&&) = default;
+    Function& operator=(Function&&) = default;
 
     int operator()(int variable) 
     {

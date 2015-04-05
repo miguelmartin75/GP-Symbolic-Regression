@@ -9,6 +9,10 @@
 #include "Operator.hpp"
 #include "Variable.hpp"
 
+
+struct Node;
+using NodePtr = std::unique_ptr<Node>;
+
 struct Node
 {
     enum class Type
@@ -21,16 +25,14 @@ struct Node
 
     virtual Type type() const = 0;
     virtual int eval(const VariableMap* map) const = 0;
-
-private:
+    virtual NodePtr clone() const = 0;
 };
 
-using NodePtr = std::shared_ptr<Node>;
 
 template <class T, class... Args>
 NodePtr node(Args&&... args)
 {
-    return std::make_shared<T>(std::forward<Args>(args)...);
+    return std::make_unique<T>(std::forward<Args>(args)...);
 }
 
 struct ValueNode : public Node
@@ -50,6 +52,8 @@ struct ValueNode : public Node
     {
         return value;
     }
+    
+    virtual NodePtr clone() const { return node<ValueNode>(value); }
 };
 
 struct VariableNode : public Node
@@ -67,6 +71,8 @@ struct VariableNode : public Node
     {
         return map != nullptr && map->find(id) == map->end() ? 0 : map->at(id);
     }
+    
+    virtual NodePtr clone() const override { return node<VariableNode>(id); }
 };
 
 
@@ -77,7 +83,7 @@ struct OperatorNode : public Node
     NodePtr right;
 
     OperatorNode(Operator op, NodePtr left, NodePtr right) :
-        op(op), left(std::move(left)), right(std::move(right))
+        op{op}, left{std::move(left)}, right{std::move(right)}
     {
     }
 
@@ -100,6 +106,8 @@ struct OperatorNode : public Node
 
         return ::eval(left->eval(map), right->eval(map), op); 
     }
+    
+    virtual NodePtr clone() const override { return node<OperatorNode>(op, left == nullptr ? nullptr : std::move(left->clone()), right == nullptr ? nullptr : std::move(right->clone())); }
 };
 
 #endif // NODE_HPP

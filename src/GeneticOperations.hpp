@@ -1,6 +1,8 @@
 #ifndef GENETICOPERATIONS_HPP
 #define GENETICOPERATIONS_HPP
 
+#include <functional>
+
 #include "Function.hpp"
 #include "random_utils.hpp"
 
@@ -23,6 +25,6 @@
  */
 
 Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist);
-Function mate(RandomEngine& engine, const Function& p1, const Function& p2);
+Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std::function<NodePtr()> nodeCreator, int maxDepth);
 
 #endif // GENETICOPERATIONS_HPP

@@ -11,14 +11,14 @@ struct Solution
 {
     // TODO: remove -1 
     Solution(Function function, size_t fitnessLevel) :
-        function(function),
+        function(std::move(function)),
         fitnessLevel(fitnessLevel)
     {
     }
 
     Function function;
     size_t fitnessLevel;
-    bool newSolution = true;
+    bool modified = false;
 };
 
 #endif // SOLUTION_HPP

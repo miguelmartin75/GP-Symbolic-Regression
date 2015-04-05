@@ -3,10 +3,16 @@
 #include <queue>
 
 #include "lang/Node.hpp"
+#include "util.hpp"
+
+// note: if it can't append the node,
+// it will join it with a RANDOM operator node
+void add(RandomEngine& engine, NodePtr& root, NodePtr nodeToInsert);
 
 template <class F>
 void visit(const NodePtr& node, F f)
 {
+    ASSERT(node.get(), "node is null");
     if(node->type() != Node::Type::OPERATION)
     {
         f(node);
@@ -22,6 +28,7 @@ void visit(const NodePtr& node, F f)
 template <class F>
 void visit(NodePtr& node, F f)
 {
+    ASSERT(node.get(), "node is null");
     if(node->type() != Node::Type::OPERATION)
     {
         f(node);
@@ -46,12 +53,18 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
 
     auto nodesToChange = randomNodes(engine, fn.getNode());
 
+    if(fn.getNode().get() == nullptr)
+    {
+        std::cout << "wotttttt" << std::endl;
+        return fn;
+    }
+    
     int currentNode = -1;
     visit(fn.getNode(), [&](NodePtr& node)
             {
                 ++currentNode;
-                // if we shouldn't change this node... 
-                if(std::find(nodesToChange.begin(), nodesToChange.end(), currentNode) == std::end(nodesToChange))
+                // if we shouldn't change this node...
+                if(!util::contains(nodesToChange, currentNode))
                 {
                     return; // then don't
                 }
@@ -94,83 +107,6 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
     return fn;
 }
 
-Function mate(RandomEngine& engine, const Function& p1, const Function& p2)
-{
-    const Function* parents[] = { &p1, &p2 };
-    std::vector<int> nodesToChange[] = { randomNodes(engine, p1.getNode()), randomNodes(engine, p2.getNode()) };
-
-    std::queue<NodePtr> singleNodes;
-    std::vector<NodePtr> operatorNodes;
-
-    NodePtr rootNode;
-
-    for(int i = 0; i < 2; ++i)
-    {
-        auto& listOfNodes = nodesToChange[i];
-        auto& parent = *parents[i];
-        int currentNode = -1;
-
-        visit(parent.getNode(), [&](NodePtr& node)
-                {
-                    ++currentNode;
-                    if(std::find(listOfNodes.begin(), listOfNodes.end(), currentNode) == std::end(listOfNodes))
-                    {
-                        return; 
-                    }
-
-                    // ughhhhhhh TODO
-                    switch(node->type())
-                    {
-                        case Node::Type::OPERATION:
-                            if(singleNodes.size() >= 2)
-                            {
-                                 
-                            } 
-                            else
-                            {
-                                operatorNodes.push_back(node); 
-                            }
-                            break;
-                        case Node::Type::VARIABLE:
-                        case Node::Type::VALUE:
-                            singleNodes.push(node);
-
-                            for(auto& n : operatorNodes)
-                            {
-                                auto op = static_cast<OperatorNode*>(n.get());
-                                if(op->left == nullptr)
-                                {
-                                    auto& nodeToPutIn = singleNodes.front();
-                                    singleNodes.pop();
-                                    op->left = nodeToPutIn;
-                                    break;
-                                }
-
-                                if(op->right == nullptr)
-                                {
-                                    auto& nodeToPutIn = singleNodes.front();
-                                    singleNodes.pop();
-                                    op->right = nodeToPutIn;
-                                    break;
-                                }
-                            }
-
-                            break;
-                        default:
-                            assert(0 && "Oops. I dunno how this even occurred");
-                            break;
-                    }
-                }
-        );
-    }
-
-    // if we pick zero operator nodes then we shall create an operator node
-    // if we pick one operator node, then we shall choose half of the operator node (50:50)
-    // if we pick two operator nodes then we shall do the above but using one of the two operators (50:50)
-    
-    return Function(rootNode);
-}
-
 int depth(const NodePtr& node)
 {
     // note: I could write this in terms on visit_const,
@@ -180,7 +116,7 @@ int depth(const NodePtr& node)
     {
         return 1;
     }
-
+    
     OperatorNode& operatorNode = *static_cast<OperatorNode*>(node.get());
     int leftDepth = depth(operatorNode.left);
     int rightDepth = depth(operatorNode.right);
@@ -198,7 +134,7 @@ std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node)
 {
     const int NODE_COUNT = nodeCount(node);
     const int amountOfNodesToChange = std::uniform_int_distribution<>(1, NODE_COUNT)(engine);
-
+    
     std::vector<int> nodes(amountOfNodesToChange, -1);
     std::uniform_int_distribution<> dist(0, NODE_COUNT);
     for(auto& node : nodes)
@@ -208,9 +144,167 @@ std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node)
         {
             newNode = dist(engine);
         }
-        while (std::find(nodes.begin(), nodes.end(), node) == std::end(nodes));
+        while (util::contains(nodes, newNode));
         
         node = newNode;
     }
     return nodes;
+}
+
+Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std::function<NodePtr()> nodeCreator, int maxDepth)
+{
+    const Function* parents[] = { &p1, &p2 };
+    std::vector<int> nodesToChange[] = { randomNodes(engine, p1.getNode()), randomNodes(engine, p2.getNode()) };
+
+    NodePtr rootNode = nullptr;
+    std::vector<NodePtr> operators;
+    std::vector<NodePtr> singles;
+
+    for(int i = 0; i < 2; ++i)
+    {
+        auto& listOfNodes = nodesToChange[i];
+        auto& parent = *parents[i];
+        int currentNode = -1;
+
+        visit(parent.getNode(), [&](const NodePtr& node)
+                {
+                    ++currentNode;
+                    if(!util::contains(listOfNodes, currentNode))
+                    {
+                        return;
+                    }
+
+                    // TODO
+                    switch(node->type())
+                    {
+                        case Node::Type::OPERATION:
+                            operators.emplace_back(::node<OperatorNode>(static_cast<OperatorNode*>(node.get())->op, nullptr, nullptr));
+                            break;
+                        case Node::Type::VARIABLE:
+                        case Node::Type::VALUE:
+                            singles.emplace_back(node->clone());
+                            break;
+                        default:
+                            assert(0 && "Oops. I dunno how this even occurred");
+                            break;
+                    }
+                }
+        );
+    }
+    
+    
+    if(operators.size() == 0)
+    {
+        std::cout << "singles.size() == " << singles.size() << '\n';
+        if(singles.size() == 0)
+        {
+            std::cout << "oo shit son\n";
+            std::cout << nodesToChange[0].size() << '\n';
+            std::cout << nodesToChange[1].size() << '\n';
+            std::cout << p1 << '\n';
+            std::cout << p2 << '\n';
+        }
+    }
+    
+    for(auto& op : operators)
+    {
+        NodePtr left;
+        NodePtr right;
+        if(singles.size() < 2)
+        {
+            std::uniform_int_distribution<> dist(0, 1);
+
+            size_t amountOfSinglesToMake = 2 - singles.size();
+            if(amountOfSinglesToMake == 2 && dist(engine) && rootNode != nullptr)
+            {
+                // just drop the node...
+                break;
+            }
+            else if(amountOfSinglesToMake == 1)
+            {
+                left = singles.front()->clone();
+                right = nodeCreator();
+                singles.erase(singles.begin());
+            }
+            else
+            {
+                left = nodeCreator();
+                right = nodeCreator();
+            }
+        }
+        else
+        {
+            left = std::move((*singles.begin())->clone());
+            right = std::move((*(singles.begin() + 1))->clone());
+            // erase does [first, last)
+            singles.erase(singles.begin(), singles.begin() + 2);
+        }
+        
+        add(engine, rootNode, std::move(op->clone()));
+        if(left)
+            add(engine, rootNode, std::move(left->clone()));
+        if(right)
+            add(engine, rootNode, std::move(right->clone()));
+    }
+    
+    
+    // just add the rest of the singles with random op nodes
+    for(auto& si : singles)
+    {
+        add(engine, rootNode, std::move(si->clone()));
+    }
+
+    
+    return Function(std::move(rootNode));
+}
+
+bool recursive_append(RandomEngine& engine, NodePtr& root, NodePtr&& nodeToInsert)
+{
+    static std::uniform_int_distribution<> dist(0, 1);
+    // if we have an empty tree
+    if(root.get() == nullptr)
+    {
+        root.reset(nodeToInsert.release());
+        return true;
+    }
+    else if(root->type() == Node::Type::OPERATION)
+    {
+        OperatorNode& opNode = *static_cast<OperatorNode*>(root.get());
+        bool useLeft = dist(engine);
+        NodePtr& left = useLeft ? opNode.left : opNode.right;
+        NodePtr& right = useLeft ? opNode.right : opNode.left;
+
+        
+        // try the root node FIRST
+        if(left.get() == nullptr)
+        {
+            left.reset(nodeToInsert.release());
+            return true;
+        }
+        else if(right.get() == nullptr)
+        {
+            right.reset(nodeToInsert.release());
+            return true;
+        }
+        else
+        {
+            // then recurse down the tree
+            return recursive_append(engine, left, std::move(nodeToInsert)) || recursive_append(engine, right, std::move(nodeToInsert));
+        }
+    }
+
+    return false;
+}
+
+void add(RandomEngine& engine, NodePtr& root, NodePtr nodeToInsert)
+{
+    static std::uniform_int_distribution<> opDist(0, (int)Operator::COUNT - 1);
+    
+    if(recursive_append(engine, root, std::move(nodeToInsert)))
+    {
+        return;
+    }
+
+    auto operatorToUse = (Operator)opDist(engine);
+    root = node<OperatorNode>(operatorToUse, std::move(root), std::move(nodeToInsert));
 }

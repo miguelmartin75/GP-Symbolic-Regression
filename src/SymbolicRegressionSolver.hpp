@@ -27,9 +27,10 @@ public:
 
         // if these three numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
-        float mutationPercent = 0.9f;
-        //float matePercent = 0.45f;
-        //float newGeneration = 0.2f;
+        //float mutationPercent = 0.75f;
+
+        float mutationPercent = 0.45f;
+        float matePercent = 0.45f;
         
 
         // max/min random co-efficients
@@ -37,21 +38,21 @@ public:
         int minimumConstantValue = 0;
         int maximumConstantValue = 1000;
         
-        int solutionCriterea = 5; /* 0 means fully successful */
+        size_t solutionCriterea = 0; /* 0 means fully successful */
     };
 
     SymbolicRegressionSolver(const Config& config, const PointList& points);
 
     SolutionList solve();
 
-private:
+public:
 
     void populate();
     SolutionList performGeneticOperations();
     Solution randomlyGenerateSolution();
     void updateFitnesses();
-    size_t fitness(Function fn) const;
-    Solution createSolution(Function fn) const; 
+    size_t fitness(Function& fn) const;
+    Solution createSolution(Function fn) const;
     
     Config m_config;
     PointList m_points;

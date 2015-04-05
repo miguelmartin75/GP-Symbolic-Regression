@@ -49,7 +49,20 @@ int main(int argc, char *argv[])
 
     SymbolicRegressionSolver solver(config, points);
     auto solutions = solver.solve();
+    /*
+    for(int i = 0; i < 20000; ++i)
+    {
+           auto sol = solver.randomlyGenerateSolution();
+        if(sol.function.getNode() == nullptr) std::cout << "oooooops\n";
+    //std::cout << sol.function << '\n';
+    }
 
+    auto sol = solver.createSolution(fn);
+    std::cout << "copied fn: " << sol.function << '\n';
+    std::cout << "new fn: " << fn << '\n';
+    
+    //auto solutions = solver.solve();
+     */
     if(solutions.size() == 0)
     {
         std::cout << "No solution found!\n";
@@ -57,14 +70,14 @@ int main(int argc, char *argv[])
     
     for(size_t i = 0; i < solutions.size(); ++i)
     {
-        auto solution = solutions[i];
+        auto& solution = solutions[i];
         std::cout << "solution " << i + 1 << ":\n";
         std::cout << "\tfunction: " << solution.function << '\n';
         std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
-        std::cout << "\tnew?: " << solution.newSolution << '\n';
-
+        std::cout << "\tmodified?: " << solution.modified << '\n';
     }
 
+    
     return 0;
 }
 
