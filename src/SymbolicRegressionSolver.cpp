@@ -69,7 +69,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             mutate(m_randomEngine, solution.function, m_constantDist);
             solution.fitnessLevel = fitness(solution.function);
-            solution.modified = true;
+            solution.mutated = true;
             newSolutions.emplace_back(solution);
         }
         
@@ -92,7 +92,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                     }
                     return node;
                 }, m_config.maxSolutionDepth));
-                sol.modified = true;
+                sol.mated = true;
                 newSolutions.emplace_back(sol);
 
                 matingList.clear();

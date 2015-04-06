@@ -136,7 +136,7 @@ std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node)
     const int amountOfNodesToChange = std::uniform_int_distribution<>(1, NODE_COUNT)(engine);
     
     std::vector<int> nodes(amountOfNodesToChange, -1);
-    std::uniform_int_distribution<> dist(0, NODE_COUNT);
+    std::uniform_int_distribution<> dist(0, NODE_COUNT - 1);
     for(auto& node : nodes)
     {
         int newNode;
@@ -192,19 +192,6 @@ Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std:
         );
     }
     
-    
-    if(operators.size() == 0)
-    {
-        std::cout << "singles.size() == " << singles.size() << '\n';
-        if(singles.size() == 0)
-        {
-            std::cout << "oo shit son\n";
-            std::cout << nodesToChange[0].size() << '\n';
-            std::cout << nodesToChange[1].size() << '\n';
-            std::cout << p1 << '\n';
-            std::cout << p2 << '\n';
-        }
-    }
     
     for(auto& op : operators)
     {

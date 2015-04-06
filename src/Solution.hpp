@@ -18,7 +18,8 @@ struct Solution
 
     Function function;
     size_t fitnessLevel;
-    bool modified = false;
+    bool mutated = false;
+    bool mated = false;
 };
 
 #endif // SOLUTION_HPP
