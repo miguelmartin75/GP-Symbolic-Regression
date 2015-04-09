@@ -26,8 +26,8 @@ struct Node
     virtual Type type() const = 0;
     virtual int eval(const VariableMap* map) const = 0;
     virtual NodePtr clone() const = 0;
+    virtual ~Node() { }
 };
-
 
 template <class T, class... Args>
 NodePtr node(Args&&... args)
@@ -42,6 +42,8 @@ struct ValueNode : public Node
         value(value)
     {
     }
+
+    virtual ~ValueNode() { }
 
     virtual Type type() const override
     {
@@ -61,6 +63,8 @@ struct VariableNode : public Node
     Variable id;
 
     VariableNode(const Variable& id) : id(id) {}
+
+    virtual ~VariableNode() { }
 
     virtual Type type() const override
     {
@@ -86,6 +90,8 @@ struct OperatorNode : public Node
         op{op}, left{std::move(left)}, right{std::move(right)}
     {
     }
+
+    virtual ~OperatorNode() { }
 
     virtual Type type() const override
     {
