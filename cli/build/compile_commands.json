@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/Volumes/HDD/Programming/repos/school/gp/cli/build",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++     -std=c++1y -stdlib=libc++ -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk -I/Volumes/HDD/Programming/repos/school/gp/cli/src -I/Volumes/HDD/Programming/repos/school/gp/cli/../lib/src    -o CMakeFiles/gp_symb_reg_cli.dir/src/main.cpp.o -c /Volumes/HDD/Programming/repos/school/gp/cli/src/main.cpp",
-  "file": "/Volumes/HDD/Programming/repos/school/gp/cli/src/main.cpp"
-}
-]

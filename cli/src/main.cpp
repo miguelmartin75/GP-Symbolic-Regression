@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <string>
 
 #include "Point.hpp"
@@ -7,6 +8,9 @@
 
 #include "string_utils.hpp"
 
+//#define PRINT_LOGS
+
+int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
 Function fn{"(* (* 5 x) (* 2 x))"};
 int initialPoint = 0;
@@ -21,18 +25,21 @@ void printValidFlags()
     std::cout << "-i <initial-point>\n";
     std::cout << "-e <end-point>\n";
     std::cout << "-s <step size>\n";
+    std::cout << "-r <amount of times to redo simulation>\n";
 }
+
+void performSimulation(const PointList& points);
 
 int main(int argc, char *argv[])
 {
     parseArguments(argc, argv);
 
-    /*
-    std::cout << "function: " << fn << '\n';
-    std::cout << "initial point: " << initialPoint << '\n';
-    std::cout << "end point: " << endPoint << '\n';
-    std::cout << "step size: " << stepSize << '\n';
-    */
+#ifdef PRINT_LOGS
+    std::clog << "function: " << fn << '\n';
+    std::clog << "initial point: " << initialPoint << '\n';
+    std::clog << "end point: " << endPoint << '\n';
+    std::clog << "step size: " << stepSize << '\n';
+#endif // PRINT_LOGS
 
     std::vector<Point> points;
     points.reserve((endPoint - initialPoint)/stepSize);
@@ -42,52 +49,44 @@ int main(int argc, char *argv[])
         points.emplace_back(i, fn(i));
     }
 
-
-    int generationCount = 0;
-    int generationAccum = 0;
-    int numberOfNoSolutions = 0;
-    for(int i = 0; i < 300; ++i)
+    for(int i = 0; i < amountOfSimulationsToPerform; ++i)
     {
-        SymbolicRegressionSolver solver(config, points);
-        auto solutions = solver.solve();
-
-        if(solutions.size() == 0)
-        {
-        //    std::cout << "No solution found!\n";
-            numberOfNoSolutions++;
-            continue;
-        }
-
-        generationAccum += solver.currentGeneration();
-        generationCount++;
-
-
-        //std::cout << solver.currentGeneration() << '\n';
-
-        for(size_t i = 0; i < solutions.size(); ++i)
-        {
-            auto& solution = solutions[i];
-            /*
-            std::cout << i + 1 << " ";
-            std::cout << solution.fitnessLevel << " ";
-            std::cout << solution.mutated << " "; 
-            std::cout << solution.mated << '\n';
-            */
-
-            /*
-               std::cout << "solution " << i + 1 << ":\n";
-               std::cout << "\tfunction: " << solution.function << '\n';
-               std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
-               std::cout << "\tmutated?: " << std::boolalpha << solution.mutated << '\n';
-               std::cout << "\tmated?: " << solution.mated << '\n';
-               */
-        }
+        performSimulation(points);
     }
 
-    std::cout << "no solution count: " << numberOfNoSolutions << '\n';
-    std::cout << "average generations for solution: " << ((double)generationAccum/generationCount) << '\n';
-
     return 0;
+}
+
+void performSimulation(const PointList& points)
+{
+    SymbolicRegressionSolver solver(config, points);
+    auto solutions = solver.solve();
+
+    if(solutions.size() == 0)
+    {
+#ifdef PRINT_LOGS
+        std::cout << "No solution!\n";
+#endif // PRINT_LOGS
+        return;
+    }
+
+    for(size_t i = 0; i < solutions.size(); ++i)
+    {
+        auto& solution = solutions[i];
+        std::cout << solver.currentGeneration() << ",";
+//        std::cout << i + 1 << ",";
+        std::cout << solution.fitnessLevel << ",";
+        std::cout << solution.mutated << ","; 
+        std::cout << solution.mated << '\n';
+
+#ifdef PRINT_LOGS
+           std::cout << "solution " << i + 1 << ":\n";
+           std::cout << "\tfunction: " << solution.function << '\n';
+           std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
+           std::cout << "\tmutated?: " << std::boolalpha << solution.mutated << '\n';
+           std::cout << "\tmated?: " << solution.mated << '\n';
+#endif //PRINT_LOGS
+    }
 }
 
 void parseArguments(int argc, char *argv[])
@@ -147,6 +146,12 @@ void parseArguments(int argc, char *argv[])
                 {
                     std::string str = argv[++i];
                     stepSize = util::from_string<int>(str);
+                }
+                break;
+            case 'r':
+                {
+                    std::string str = argv[++i];
+                    amountOfSimulationsToPerform = util::from_string<int>(str);
                 }
                 break;
             case 'c':
