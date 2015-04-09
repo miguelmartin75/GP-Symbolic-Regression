@@ -172,7 +172,6 @@ Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std:
                         return;
                     }
 
-                    // TODO
                     switch(node->type())
                     {
                         case Node::Type::OPERATION:
