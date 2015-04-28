@@ -44,13 +44,15 @@ void SymbolicRegressionSolver::step()
                     m_solutions.end(),
                     [&](const Solution& sol) -> bool
                     {
-                    return sol.fitnessLevel > m_config.solutionCriterea;
+                        return sol.fitnessLevel > m_config.solutionCriterea;
                     }), m_solutions.end());
         m_foundSolution = true;
         return;
     }
 
+#ifndef ONE_POPULATION
     m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * m_config.keepPercentage), m_solutions.end());
+#endif
 
     m_solutions = performGeneticOperations();
 }
@@ -79,15 +81,31 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 
     for(auto& solution : m_solutions)
     {
+#ifdef VERBOSE_LOG
+        std::cout << "fn: " << solution.function << '\n';
+#endif
         auto randomNumber = dist(engine);
+#ifndef ONE_POPULATION
         if(randomNumber <= m_config.mutationPercent)
+#endif
         {
-            mutate(m_randomEngine, solution.function, m_constantDist);
+            std::cout << "mutated: ";
+            bool useNearestNeighbour = false;
+            if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::ALWAYS_USE)
+            {
+                useNearestNeighbour = true;
+            }
+            else if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::RANDOM)
+            {
+                useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
+            }
+
+            mutate(m_randomEngine, solution.function, m_constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
             solution.fitnessLevel = fitness(solution.function);
             solution.mutated = true;
             newSolutions.emplace_back(solution);
         }
-
+#ifndef ONE_POPULATION
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
             matingList.emplace_back(&solution.function);
@@ -110,6 +128,10 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                 sol.mated = true;
                 newSolutions.emplace_back(sol);
 
+#ifdef VERBOSE_LOG
+                std::cout << "mating " << solution.function;
+#endif 
+
                 matingList.clear();
             }
         }
@@ -117,6 +139,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             newSolutions.emplace_back(solution);
         }
+#endif
     }
 
     for(size_t i = 0; i < m_config.initialPopulation - newSolutions.size(); ++i)

@@ -24,7 +24,8 @@
  * Source: http://pages.ucsd.edu/~aerobins/genetic/div3.pdf
  */
 
-Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist);
+Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize);
+// TODO: maxDepth to do something..
 Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std::function<NodePtr()> nodeCreator, int maxDepth);
 
 #endif // GENETICOPERATIONS_HPP

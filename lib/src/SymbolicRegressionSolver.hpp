@@ -5,6 +5,7 @@
 
 #include "Point.hpp"
 #include "Solution.hpp"
+#include "Config.hpp"
 
 #include "random_utils.hpp"
 
@@ -17,13 +18,17 @@ public:
 
     struct Config
     {
+#ifdef ONE_POPULATION
+        int initialPopulation = 1;
+#else
         int initialPopulation = 1600;
+#endif
         int maxGenerations = 300;
         int initialMaxDepth = 5;
         int maxSolutionDepth = 20;
 
         // TODO: random removes from various positions
-        float keepPercentage = 0.90f;
+        float keepPercentage = 0.10f;
 
         // if these three numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
@@ -34,9 +39,21 @@ public:
         // max/min random co-efficients
         bool useMaxMinRandom = true;
         int minimumConstantValue = 0;
-        int maximumConstantValue = 1000;
+        int maximumConstantValue = 100;
         
         size_t solutionCriterea = 0; /* 0 means fully successful */
+
+        double chanceToChangeConstant = 0.3;
+        double chanceToChangeVar = 0.4;
+         
+        enum class NearestNeighbourOption
+        {
+            ALWAYS_USE,
+            NEVER_USE,
+            RANDOM
+        } nearestNeighbourOption = NearestNeighbourOption::RANDOM;
+        double chanceToUseNearestNeighbour = 0.7;
+        int stepSize = 1; /* step for nearest neightbour */
     };
 
     SymbolicRegressionSolver(const Config& config, const PointList& points);
@@ -60,7 +77,7 @@ public:
     Config m_config;
     PointList m_points;
     SolutionList m_solutions;
-
+ 
     std::random_device m_randomDevice;
     RandomEngine m_randomEngine;
     std::uniform_int_distribution<int> m_constantDist;

@@ -47,12 +47,13 @@ int nodeCount(const NodePtr& node);
 
 std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node);
 
-Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist)
+Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize)
 {
     static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
 
     auto nodesToChange = randomNodes(engine, fn.getNode());
-    std::uniform_int_distribution<> evenDist(0, 1);
+    std::uniform_int_distribution<> changeVarDist(0, chanceToChangeVar);
+    std::uniform_int_distribution<> changeConstantDist(0, chanceToChangeConstant);
 
     if(fn.getNode().get() == nullptr)
     {
@@ -79,13 +80,22 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                         break;
                     case Node::Type::VALUE:
                         {
-                            if(evenDist(engine))
+                            if(changeConstantDist(engine))
                             {
                                 node = ::node<VariableNode>("x");
                             }
                             else
                             {
-                                static_cast<ValueNode*>(node.get())->value = constantDist(engine);
+                                ValueNode& valueNode = *static_cast<ValueNode*>(node.get());
+                                if(useNearestNeighbour)
+                                {
+                                    int sign = std::uniform_int_distribution<>{0, 1}(engine) ? 1 : -1;
+                                    valueNode.value += sign * stepSize;
+                                }
+                                else
+                                {
+                                    valueNode.value = constantDist(engine);
+                                }
                             }
                         }
                         break;
@@ -96,7 +106,10 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                         // actually delete the reference. So in that sense,
                         // we should be using unique_ptr's for the nodes. Since
                         // I know that no one else is going to be holding the Node.
-                        if(evenDist(engine)) node = ::node<ValueNode>(constantDist(engine));
+                        if(changeVarDist(engine)) 
+                        {
+                            node = ::node<ValueNode>(constantDist(engine));
+                        }
                     break;
                     default:
                         break;
@@ -257,7 +270,6 @@ bool recursive_append(RandomEngine& engine, NodePtr& root, NodePtr&& nodeToInser
         bool useLeft = dist(engine);
         NodePtr& left = useLeft ? opNode.left : opNode.right;
         NodePtr& right = useLeft ? opNode.right : opNode.left;
-
         
         // try the root node FIRST
         if(left.get() == nullptr)

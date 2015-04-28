@@ -5,14 +5,15 @@
 #include "Point.hpp"
 #include "Function.hpp"
 #include "SymbolicRegressionSolver.hpp"
+#include "Config.hpp"
 
 #include "string_utils.hpp"
 
-//#define PRINT_LOGS
+//#define VERBOSE_LOG
 
 int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
-Function fn{"(* (* 5 x) (* 2 x))"};
+Function fn{"(* (+ 12 x) (+ x 1))"};
 int initialPoint = 0;
 int endPoint = 10;
 int stepSize = 1;
@@ -34,12 +35,12 @@ int main(int argc, char *argv[])
 {
     parseArguments(argc, argv);
 
-#ifdef PRINT_LOGS
+#ifdef VERBOSE_LOG
     std::clog << "function: " << fn << '\n';
     std::clog << "initial point: " << initialPoint << '\n';
     std::clog << "end point: " << endPoint << '\n';
     std::clog << "step size: " << stepSize << '\n';
-#endif // PRINT_LOGS
+#endif // VERBOSE_LOG
 
     std::vector<Point> points;
     points.reserve((endPoint - initialPoint)/stepSize);
@@ -64,9 +65,9 @@ void performSimulation(const PointList& points)
 
     if(solutions.size() == 0)
     {
-#ifdef PRINT_LOGS
+#ifdef VERBOSE_LOG
         std::cout << "No solution!\n";
-#endif // PRINT_LOGS
+#endif // VERBOSE_LOG
         return;
     }
 
@@ -79,13 +80,13 @@ void performSimulation(const PointList& points)
         std::cout << solution.mutated << ","; 
         std::cout << solution.mated << '\n';
 
-#ifdef PRINT_LOGS
+#ifdef VERBOSE_LOG
            std::cout << "solution " << i + 1 << ":\n";
            std::cout << "\tfunction: " << solution.function << '\n';
            std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
            std::cout << "\tmutated?: " << std::boolalpha << solution.mutated << '\n';
            std::cout << "\tmated?: " << solution.mated << '\n';
-#endif //PRINT_LOGS
+#endif //VERBOSE_LOG
     }
 }
 
