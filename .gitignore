@@ -1,0 +1,5 @@
+# generated files
+build*
+lib/src/Config.hpp
+.ycm*
+*.csv
