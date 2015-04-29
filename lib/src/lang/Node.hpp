@@ -32,7 +32,7 @@ struct Node
 template <class T, class... Args>
 NodePtr node(Args&&... args)
 {
-    return std::make_unique<T>(std::forward<Args>(args)...);
+    return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
 }
 
 struct ValueNode : public Node

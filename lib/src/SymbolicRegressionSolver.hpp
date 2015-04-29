@@ -56,17 +56,29 @@ public:
         int stepSize = 1; /* step for nearest neightbour */
     };
 
+    SymbolicRegressionSolver();
     SymbolicRegressionSolver(const Config& config, const PointList& points);
 
     void step();
     int currentGeneration() const { return m_currentGeneration; }
     void reset();
+    void clearSolutions() { m_solutions.clear(); }
     const SolutionList& currentSolutionSet() const { return m_solutions; }
+    Function& getFunction(int index) { return m_solutions[index].function; }
 
     SolutionList solve();
 
-public:
+    void setPoints(PointList points) { m_points = std::move(points); }
+    PointList& points() { return m_points; }
+    const PointList& points() const { return m_points; }
 
+    bool isRunning() const { return m_isRunning; }
+    void stop() { m_isRunning = false; }
+    bool isReset() const { return m_isReset; }
+
+private:
+
+    void sort();
     void populate();
     SolutionList performGeneticOperations();
     Solution randomlyGenerateSolution();
@@ -83,6 +95,8 @@ public:
     std::uniform_int_distribution<int> m_constantDist;
     int m_currentGeneration = 0;
     bool m_foundSolution = false;
+    bool m_isRunning = false;
+    bool m_isReset = false;
 };
 
 #endif // SYMBOLICREGRESSIONSOLVER_HPP

@@ -5,10 +5,15 @@
 #include "Function.hpp"
 #include "GeneticOperations.hpp"
 
+SymbolicRegressionSolver::SymbolicRegressionSolver() :
+    m_randomEngine{m_randomDevice()}
+{
+}
+
 SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const PointList& points) :
     m_config(config),
     m_points(points),
-    m_randomEngine(m_randomDevice())
+    m_randomEngine{m_randomDevice()}
 {
     if(config.useMaxMinRandom)
     {
@@ -18,20 +23,19 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
 
 void SymbolicRegressionSolver::reset()
 {
+    clearSolutions();
+    m_isReset = true;
+
     m_currentGeneration = 0;
     m_foundSolution = false;
-    m_solutions.clear();
+
+    populate();
 }
 
 void SymbolicRegressionSolver::step()
 {
+    m_isReset = false;
     m_currentGeneration++;
-
-    std::sort(m_solutions.begin(), m_solutions.end(),
-            [](const Solution& s1, const Solution& s2) -> bool
-            {
-            return s1.fitnessLevel < s2.fitnessLevel;
-            });
 
     /*
        std::cout << "Best solution for generation " << m_currentGeneration << " is: ";
@@ -55,14 +59,29 @@ void SymbolicRegressionSolver::step()
 #endif
 
     m_solutions = performGeneticOperations();
+
+    sort();
+}
+
+void SymbolicRegressionSolver::sort()
+{
+    std::sort(m_solutions.begin(), m_solutions.end(),
+            [](const Solution& s1, const Solution& s2) -> bool
+            {
+                return s1.fitnessLevel < s2.fitnessLevel;
+            });
 }
 
 SolutionList SymbolicRegressionSolver::solve()
 {
-    reset();
-    populate();
+    if(!isReset())
+    {
+        reset();
+    }
 
-    for(int i = 0; (i < m_config.maxGenerations && m_solutions.size() != 0) && !m_foundSolution; ++i)
+    m_isRunning = true;
+
+    for(int i = 0; m_isRunning && (i < m_config.maxGenerations && m_solutions.size() != 0) && !m_foundSolution; ++i)
     {
         step();
     }
@@ -156,6 +175,7 @@ void SymbolicRegressionSolver::populate()
     {
         m_solutions.emplace_back(randomlyGenerateSolution());
     }
+    sort();
 }
 
 void SymbolicRegressionSolver::updateFitnesses()

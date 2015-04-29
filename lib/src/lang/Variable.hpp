@@ -2,9 +2,9 @@
 #define VARIABLE_HPP
 
 #include <string>
-#include <unordered_map>
+#include <map>
 
 using Variable = std::string;
-using VariableMap = std::unordered_map<Variable, int>;
+using VariableMap = std::map<Variable, int>;
 
 #endif // VARIABLE_HPP
