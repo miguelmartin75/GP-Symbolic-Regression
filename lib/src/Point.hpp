@@ -12,7 +12,7 @@ struct Point
 
 inline bool operator<(const Point& p1, const Point& p2)
 {
-    return p1.x < p2.x && p2.y < p2.y;
+    return p1.x < p2.x;
 }
 
 inline bool operator>=(const Point& p1, const Point& p2)

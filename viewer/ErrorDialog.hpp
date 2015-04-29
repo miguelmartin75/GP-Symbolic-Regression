@@ -1,0 +1,4 @@
+#ifndef ERRORDIALOG_HPP
+#define ERRORDIALOG_HPP
+
+#endif // ERRORDIALOG_HPP
