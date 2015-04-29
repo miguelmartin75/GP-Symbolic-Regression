@@ -13,10 +13,10 @@
 
 int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
-Function fn{"(* (+ 12 x) (+ x 1))"};
-int initialPoint = 0;
+Function fn{"(+ 1 x)"};
+int initialPoint = -10;
 int endPoint = 10;
-int stepSize = 1;
+int stepSize = 2;
 
 void parseArguments(int argc, char *argv[]);
 void printValidFlags()

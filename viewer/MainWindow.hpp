@@ -55,7 +55,7 @@ private:
     // TODO: Refractor to it's own widget?
     SymbolicRegressionSolver m_solver;
 
-    PointListEditDialog* m_pointListEditDialog;
+    PointListEditDialog* m_pointListEditDialog = nullptr;
 
     long long m_sleepAmount = 0;
 };

@@ -50,7 +50,6 @@ struct ParseResult
         }
         return *this;
     }
-
     
     
     NodePtr statement; // statement that was parsed

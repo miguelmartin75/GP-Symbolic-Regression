@@ -91,7 +91,7 @@ std::string nextNode(const NodePtr& node)
                 auto& castedNode = *static_cast<ValueNode*>(node.get());
                 return util::to_string<std::string>(castedNode.value);
             }
-            break;
+           break;
         case Node::Type::VARIABLE:
             {
                 auto& castedNode = *static_cast<VariableNode*>(node.get());

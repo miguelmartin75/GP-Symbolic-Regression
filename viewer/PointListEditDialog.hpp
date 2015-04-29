@@ -7,6 +7,7 @@
 #include <Types.hpp>
 
 #include "PointEditDialog.hpp"
+#include "GeneratePointDialog.hpp"
 
 #include "ui_PointListEditDialog.h"
 
@@ -27,7 +28,10 @@ private slots:
     void on_removeButton_clicked();
 
     void on_generateButton_clicked();
+
     void on_okButton_clicked();
+
+    void on_generatePointDialog_addedPoints();
 
 private:
 
@@ -35,22 +39,25 @@ private:
     void error(const QString& str);
     bool pointExists(const Point& p) const
     {
-        auto it = std::find_if(m_points.begin(), m_points.end(), [&](const Point& point) { return point.x == p.x; });
+        auto it = std::find_if(m_points.begin(), m_points.end(),
+                              [&](const Point& point) { return point.x == p.x; });
         return it != m_points.end();
     }
+
+    void update() { refreshListView(); m_onUpdate(); }
 
     template <class F>
     void editPoints(F f)
     {
         f();
         std::sort(m_points.begin(), m_points.end());
-        refreshListView();
-        m_onUpdate();
+        update();
     }
 
     Ui::PointListEditDialog ui;
 
-    PointEditDialog* m_pointEditDialog;
+    PointEditDialog* m_pointEditDialog = nullptr;
+    GeneratePointDialog* m_generatePointDialog = nullptr;
     std::function<void()> m_onUpdate;
     PointList& m_points;
 };

@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
 
+
     initGraph();
 }
 
@@ -180,6 +181,7 @@ void MainWindow::on_actionPoints_triggered()
         {
             updatePointsToModel();
         });
+        m_pointListEditDialog->setWindowTitle("Edit Points");
     }
 
     m_pointListEditDialog->show();

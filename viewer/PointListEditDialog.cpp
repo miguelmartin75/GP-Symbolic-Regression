@@ -7,7 +7,14 @@ PointListEditDialog::PointListEditDialog(QWidget *parent, PointList& points) :
     m_points(points)
 {
     ui.setupUi(this);
+
     m_pointEditDialog = new PointEditDialog(this);
+    m_pointEditDialog->setWindowTitle("Point Edit");
+
+    m_generatePointDialog = new GeneratePointDialog(this, m_points);
+    QObject::connect(m_generatePointDialog, SIGNAL(addedPoints()), this, SLOT(on_generatePointDialog_addedPoints()));
+    m_generatePointDialog->setWindowTitle("Generate Points");
+
     refreshListView();
 }
 
@@ -54,16 +61,24 @@ void PointListEditDialog::on_editButton_clicked()
 
 void PointListEditDialog::on_removeButton_clicked()
 {
-
+    auto indexToRemove = ui.listWidget->currentIndex().row();
+    editPoints([&]
+    {
+        m_points.erase(m_points.begin() + indexToRemove);
+    });
 }
 
 void PointListEditDialog::on_generateButton_clicked()
 {
-
+    m_generatePointDialog->show();
+    m_generatePointDialog->activateWindow();
+    m_generatePointDialog->raise();
+    m_generatePointDialog->setFocus();
 }
 
 void PointListEditDialog::refreshListView()
 {
+    std::cout << "refreshing list view" << std::endl;
     ui.listWidget->clear();
     for(auto& point : m_points)
     {
@@ -75,4 +90,9 @@ void PointListEditDialog::refreshListView()
 void PointListEditDialog::on_okButton_clicked()
 {
     this->close();
+}
+
+void PointListEditDialog::on_generatePointDialog_addedPoints()
+{
+    update();
 }
