@@ -5,21 +5,29 @@
 #-------------------------------------------------
 
 QT       += core gui
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+
+CONFIG += c++11
+QMAKE_CXX=/usr/local/bin/clang++
 
 TARGET = viewer
 TEMPLATE = app
 
+LIBS += -L/Volumes/HDD/Programming/repos/school/gp/lib/build -lgp_symb_reg_d_s
+INCLUDEPATH += ../lib/src
+INCLUDEPATH += /usr/local/include
 
 SOURCES += main.cpp\
         MainWindow.cpp \
         qcustomplot.cpp \
+    PointListEditDialog.cpp \
     PointEditDialog.cpp
 
 HEADERS  += MainWindow.hpp \
+            PointListEditDialog.hpp \
             qcustomplot.h \
     PointEditDialog.hpp
 
 FORMS    += MainWindow.ui \
+    PointEditDialog.ui \
     PointEditDialog.ui
