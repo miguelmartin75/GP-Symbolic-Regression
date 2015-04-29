@@ -5,22 +5,19 @@
 
 #include <Point.hpp>
 
-namespace Ui {
-class PointEditDialog;
-}
+#include "ui_PointEditDialog.h"
 
 class PointEditDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PointEditDialog(QWidget *parent = 0, const Point& point);
-    ~PointEditDialog();
+    explicit PointEditDialog(QWidget *parent = 0, const Point& point = Point{});
 
     const Point& point() { return m_point; }
 
 private:
-    Ui::PointEditDialog *ui;
+    Ui::PointEditDialog ui;
 
     Point m_point;
 };

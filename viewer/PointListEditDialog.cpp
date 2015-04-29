@@ -1,14 +1,12 @@
-#include "pointeditdialog.h"
-#include "ui_pointeditdialog.h"
+#include "PointListEditDialog.hpp"
 
 PointListEditDialog::PointListEditDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::PointEditDialog)
+    QDialog(parent)
 {
-    ui->setupUi(this);
+    ui.setupUi(this);
 }
 
-PointListEditDialog::~PointListEditDialog()
+void PointListEditDialog::on_addButton_clicked()
 {
-    delete ui;
+    m_pointEditDialog = new PointEditDialog(this);
 }

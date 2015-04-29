@@ -23,11 +23,20 @@ private slots:
 
     void on_solutionsList_currentRowChanged(int currentRow);
 
+    void on_actionPoints_triggered();
+
+    void on_actionStep_triggered();
+
+    void on_actionReset_triggered();
+
+    void on_actionRun_triggered();
+
 private:
 
     void setPointsToModel(PointList points);
     void initGraph();
     void step();
+    void stop();
     void run();
     void updateInterface();
     void reset();

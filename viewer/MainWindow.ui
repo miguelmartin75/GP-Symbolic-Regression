@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Symbolic Regresison</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="sizePolicy">
@@ -122,12 +122,6 @@
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionImport_Data"/>
-   </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
@@ -143,7 +137,6 @@
     <addaction name="separator"/>
     <addaction name="actionReset"/>
    </widget>
-   <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSimulate"/>
   </widget>
@@ -156,29 +149,39 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionPoints">
-   <property name="text">
-    <string>Points</string>
-   </property>
-  </action>
   <action name="actionStep">
    <property name="text">
     <string>Step</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionRun">
    <property name="text">
     <string>Run</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
   </action>
   <action name="actionReset">
    <property name="text">
     <string>Reset</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
   </action>
-  <action name="actionImport_Data">
+  <action name="actionPoints">
    <property name="text">
-    <string>Import Data</string>
+    <string>Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Add, edit or remove points</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

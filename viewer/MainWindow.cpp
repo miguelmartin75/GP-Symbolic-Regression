@@ -1,5 +1,7 @@
 #include "MainWindow.hpp"
 
+#include "PointListEditDialog.hpp"
+
 #include <thread>
 #include <boost/lexical_cast.hpp>
 
@@ -28,6 +30,8 @@ void MainWindow::initGraph()
     // add two graphs
     ui.plotWidget->addGraph();
     ui.plotWidget->addGraph();
+
+    ui.plotWidget->graph(GRAPH_DATA_TO_PLOT)->setPen(QPen(QColor(200, 50, 0)));
 
     Function fn{"(+ x 1)"};
 
@@ -77,7 +81,7 @@ void MainWindow::updateGraph(int graph, int index)
     {
         g->addData(point.x, fn(point.x));
     }
-    repaint();
+    ui.plotWidget->replot();
     std::cout << "Updated graph " << fn << std::endl;
 }
 
@@ -89,9 +93,29 @@ void MainWindow::step()
 
 void MainWindow::run()
 {
-    m_solver.solve();
-    updateInterface();
+    if(!m_solver.isRunning())
+    {
+        std::thread runnerThread([&] {
+            m_solver.solve();
+            stop();
+            updateInterface();
+        });
+
+        runnerThread.detach();
+        ui.runButton->setText("Stop");
+        ui.actionRun->setText("Stop");
+    }
+    else
+    {
+        stop();
+    }
+}
+
+void MainWindow::stop()
+{
     ui.runButton->setText("Run");
+    ui.actionRun->setText("Run");
+    m_solver.stop();
 }
 
 void MainWindow::updateInterface()
@@ -105,33 +129,17 @@ void MainWindow::updateInterface()
 
         ui.solutionsList->addItem(QString{str.c_str()});
     }
+    //updateGraph(ui.solutionsList->currentRow())
 }
 
 void MainWindow::on_stepButton_clicked()
 {
     step();
-    /*
-    std::thread thread{[&] { step() }};
-    thread.detach();
-    */
 }
 
 void MainWindow::on_runButton_clicked()
 {
-    if(!m_solver.isRunning())
-    {
-        std::thread runnerThread([&] {
-            run();
-        });
-
-        runnerThread.detach();
-        ui.runButton->setText("Stop");
-    }
-    else
-    {
-        ui.runButton->setText("Run");
-        m_solver.stop();
-    }
+    run();
 }
 
 void MainWindow::on_resetButton_clicked()
@@ -143,4 +151,26 @@ void MainWindow::on_resetButton_clicked()
 void MainWindow::on_solutionsList_currentRowChanged(int currentRow)
 {
     updateGraph(CURRENT_PLOT, currentRow);
+}
+
+void MainWindow::on_actionPoints_triggered()
+{
+    // TODO
+    PointListEditDialog* pointEditor = new PointListEditDialog(this);
+    pointEditor->show();
+}
+
+void MainWindow::on_actionStep_triggered()
+{
+    step();
+}
+
+void MainWindow::on_actionReset_triggered()
+{
+    reset();
+}
+
+void MainWindow::on_actionRun_triggered()
+{
+    run();
 }

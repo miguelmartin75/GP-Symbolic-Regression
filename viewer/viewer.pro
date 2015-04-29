@@ -20,14 +20,15 @@ INCLUDEPATH += /usr/local/include
 SOURCES += main.cpp\
         MainWindow.cpp \
         qcustomplot.cpp \
-    PointListEditDialog.cpp \
-    PointEditDialog.cpp
+    PointEditDialog.cpp \
+    PointListEditDialog.cpp
 
 HEADERS  += MainWindow.hpp \
-            PointListEditDialog.hpp \
             qcustomplot.h \
-    PointEditDialog.hpp
+    PointEditDialog.hpp \
+    PointListEditDialog.hpp
 
 FORMS    += MainWindow.ui \
     PointEditDialog.ui \
-    PointEditDialog.ui
+    PointEditDialog.ui \
+    PointListEditDialog.ui

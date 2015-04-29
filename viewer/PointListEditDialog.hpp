@@ -1,7 +1,13 @@
-#ifndef POINTEDITDIALOG_HPP
-#define POINTEDITDIALOG_HPP
+#ifndef POINTLISTEDITDIALOG_HPP
+#define POINTLISTEDITDIALOG_HPP
 
-#include "ui_PointEditDialog.h"
+#include <memory>
+
+#include "PointEditDialog.hpp"
+
+#include "ui_PointListEditDialog.h"
+
+#include <iostream>
 
 class PointListEditDialog : public QDialog
 {
@@ -9,12 +15,17 @@ class PointListEditDialog : public QDialog
 
 public:
     explicit PointListEditDialog(QWidget *parent = 0);
+    ~PointListEditDialog(){
+        std::cout << "testing 1 2 3" << std::endl;
+    }
 
 private slots:
-    void on_yLineEdit_textChanged(const QString &arg1);
+    void on_addButton_clicked();
 
 private:
-    Ui::PointEditDialog ui;
+    Ui::PointListEditDialog ui;
+
+    PointEditDialog* m_pointEditDialog;
 };
 
-#endif // POINTEDITDIALOG_HPP
+#endif // POINTLISTEDITDIALOG_HPP

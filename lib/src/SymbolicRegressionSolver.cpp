@@ -108,7 +108,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         if(randomNumber <= m_config.mutationPercent)
 #endif
         {
-            std::cout << "mutated: ";
+
             bool useNearestNeighbour = false;
             if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::ALWAYS_USE)
             {
@@ -123,6 +123,10 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
             solution.fitnessLevel = fitness(solution.function);
             solution.mutated = true;
             newSolutions.emplace_back(solution);
+
+#ifdef VERBOSE_LOG
+            std::cout << "mutated: " << solution.function << '\n';
+#endif // VERBOSE_LOG
         }
 #ifndef ONE_POPULATION
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
