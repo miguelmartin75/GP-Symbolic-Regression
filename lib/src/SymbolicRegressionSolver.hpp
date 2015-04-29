@@ -2,15 +2,10 @@
 #define SYMBOLICREGRESSIONSOLVER_HPP
 
 #include <vector>
-
-#include "Point.hpp"
-#include "Solution.hpp"
 #include "Config.hpp"
+#include "Types.hpp"
 
 #include "random_utils.hpp"
-
-using PointList = std::vector<Point>;
-using SolutionList = std::vector<Solution>;
 
 class SymbolicRegressionSolver
 {
@@ -72,9 +67,13 @@ public:
     PointList& points() { return m_points; }
     const PointList& points() const { return m_points; }
 
+    void setIsRunning(bool b) { m_isRunning = b; }
     bool isRunning() const { return m_isRunning; }
     void stop() { m_isRunning = false; }
     bool isReset() const { return m_isReset; }
+
+    Config& config() { return m_config; }
+    const Config& config() const { return m_config; }
 
 private:
 
