@@ -81,6 +81,7 @@ std::string nextNode(const NodePtr& node)
         case Node::Type::OPERATION:
             {
                 auto& castedNode = *static_cast<OperatorNode*>(node.get());
+                if(castedNode.left == nullptr || castedNode.right == nullptr) return "null";
                 return "(" + util::to_string<std::string>(castedNode.op) + " " +
                         nextNode(castedNode.left) + " " + nextNode(castedNode.right) + ")";
             }
