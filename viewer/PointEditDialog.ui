@@ -55,7 +55,7 @@
     <string>Y</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -66,17 +66,17 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QLineEdit" name="yLineEdit"/>
+     <widget class="QLineEdit" name="xLineEdit"/>
     </item>
     <item>
-     <widget class="QLineEdit" name="xLineEdit"/>
+     <widget class="QLineEdit" name="yLineEdit"/>
     </item>
    </layout>
   </widget>
  </widget>
  <tabstops>
-  <tabstop>yLineEdit</tabstop>
   <tabstop>xLineEdit</tabstop>
+  <tabstop>yLineEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>

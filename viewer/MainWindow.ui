@@ -108,6 +108,13 @@
          </item>
         </layout>
        </item>
+       <item>
+        <widget class="QLabel" name="currentGenerationLabel">
+         <property name="text">
+          <string>Current Generation: 0</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>

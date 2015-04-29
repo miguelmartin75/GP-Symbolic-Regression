@@ -26,7 +26,9 @@ SOURCES += main.cpp\
 HEADERS  += MainWindow.hpp \
             qcustomplot.h \
     PointEditDialog.hpp \
-    PointListEditDialog.hpp
+    PointListEditDialog.hpp \
+    ErrorDialog.hpp \
+    RunThread.hpp
 
 FORMS    += MainWindow.ui \
     PointEditDialog.ui \

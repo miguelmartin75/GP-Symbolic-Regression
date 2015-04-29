@@ -1,16 +1,16 @@
 #include "MainWindow.hpp"
 
-#include "PointListEditDialog.hpp"
-
-#include <thread>
 #include <boost/lexical_cast.hpp>
+
+#include "PointListEditDialog.hpp"
+#include "ErrorDialog.hpp"
+#include "RunThread.hpp"
 
 enum
 {
     GRAPH_DATA_TO_PLOT = 0,
     CURRENT_PLOT = 1
 };
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -56,6 +56,13 @@ void MainWindow::reset()
 
 void MainWindow::setPointsToModel(PointList points)
 {
+    m_solver.setPoints(std::move(points));
+    updatePointsToModel();
+}
+
+void MainWindow::updatePointsToModel()
+{
+    auto& points = m_solver.points();
     auto graph = ui.plotWidget->graph(0);
     graph->clearData();
     for(auto& point : points)
@@ -63,8 +70,7 @@ void MainWindow::setPointsToModel(PointList points)
         qDebug() << "adding point: (" << point.x << ", " << point.y << ")";
         graph->addData(point.x, point.y);
     }
-
-    m_solver.setPoints(std::move(points));
+    ui.plotWidget->replot();
 }
 
 void MainWindow::updateGraph(int graph, int index)
@@ -91,17 +97,28 @@ void MainWindow::step()
     updateInterface();
 }
 
+void MainWindow::safeStep()
+{
+    if(m_solver.isRunning())
+    {
+        errorDialog("Cannot step whilst the solver is running...");
+        return;
+    }
+    step();
+}
+
 void MainWindow::run()
 {
+    qDebug() << "Run notification";
     if(!m_solver.isRunning())
     {
-        std::thread runnerThread([&] {
-            m_solver.solve();
-            stop();
-            updateInterface();
-        });
+        qDebug() << "Attempting to run";
+        RunThread* thread = new RunThread(m_sleepAmount, m_solver);
+        QObject::connect(thread, SIGNAL(stepOccured()), this, SLOT(on_runnerThread_stepOccured()));
+        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(thread, SIGNAL(stoppedRunning()), this, SLOT(on_runnerThread_stoppedRunnnig()));
+        thread->start();
 
-        runnerThread.detach();
         ui.runButton->setText("Stop");
         ui.actionRun->setText("Stop");
     }
@@ -129,12 +146,13 @@ void MainWindow::updateInterface()
 
         ui.solutionsList->addItem(QString{str.c_str()});
     }
-    //updateGraph(ui.solutionsList->currentRow())
+
+    ui.currentGenerationLabel->setText("Current Generation: " + QString::number(m_solver.currentGeneration()));
 }
 
 void MainWindow::on_stepButton_clicked()
 {
-    step();
+    safeStep();
 }
 
 void MainWindow::on_runButton_clicked()
@@ -155,14 +173,24 @@ void MainWindow::on_solutionsList_currentRowChanged(int currentRow)
 
 void MainWindow::on_actionPoints_triggered()
 {
-    // TODO
-    PointListEditDialog* pointEditor = new PointListEditDialog(this);
-    pointEditor->show();
+    if(!m_pointListEditDialog)
+    {
+        m_pointListEditDialog = new PointListEditDialog(this, m_solver.points());
+        m_pointListEditDialog->onUpdate([&]
+        {
+            updatePointsToModel();
+        });
+    }
+
+    m_pointListEditDialog->show();
+    m_pointListEditDialog->activateWindow();
+    m_pointListEditDialog->raise();
+    m_pointListEditDialog->setFocus();
 }
 
 void MainWindow::on_actionStep_triggered()
 {
-    step();
+    safeStep();
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -173,4 +201,17 @@ void MainWindow::on_actionReset_triggered()
 void MainWindow::on_actionRun_triggered()
 {
     run();
+}
+
+void MainWindow::on_runnerThread_stepOccured()
+{
+    qDebug() << "step event triggered";
+    updateInterface();
+}
+
+void MainWindow::on_runnerThread_stoppedRunnnig()
+{
+    qDebug() << "Finished";
+    ui.runButton->setText("Run");
+    ui.actionRun->setText("Run");
 }
