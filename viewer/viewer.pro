@@ -13,7 +13,7 @@ QMAKE_CXX=/usr/local/bin/clang++
 TARGET = viewer
 TEMPLATE = app
 
-LIBS += -L/Volumes/HDD/Programming/repos/school/gp/lib/build -lgp_symb_reg_d_s
+LIBS += -L/Volumes/HDD/Programming/repos/school/gp/lib/build -lgp_symb_reg_s
 INCLUDEPATH += ../lib/src
 INCLUDEPATH += /usr/local/include
 
@@ -22,7 +22,8 @@ SOURCES += main.cpp\
         qcustomplot.cpp \
     PointEditDialog.cpp \
     PointListEditDialog.cpp \
-    GeneratePointDialog.cpp
+    GeneratePointDialog.cpp \
+    ConfigDialog.cpp
 
 HEADERS  += MainWindow.hpp \
             qcustomplot.h \
@@ -30,10 +31,12 @@ HEADERS  += MainWindow.hpp \
     PointListEditDialog.hpp \
     ErrorDialog.hpp \
     RunThread.hpp \
-    GeneratePointDialog.hpp
+    GeneratePointDialog.hpp \
+    ConfigDialog.hpp
 
 FORMS    += MainWindow.ui \
     PointEditDialog.ui \
     PointEditDialog.ui \
     PointListEditDialog.ui \
-    GeneratePointDialog.ui
+    GeneratePointDialog.ui \
+    ConfigDialog.ui

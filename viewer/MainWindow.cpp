@@ -1,10 +1,19 @@
 #include "MainWindow.hpp"
 
+#include <fstream>
 #include <boost/lexical_cast.hpp>
 
 #include "PointListEditDialog.hpp"
 #include "ErrorDialog.hpp"
 #include "RunThread.hpp"
+
+void showDialog(QDialog& dialog)
+{
+    dialog.show();
+    dialog.activateWindow();
+    dialog.raise();
+    dialog.setFocus();
+}
 
 enum
 {
@@ -16,7 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     ui.setupUi(this);
-
 
     initGraph();
 }
@@ -183,11 +191,7 @@ void MainWindow::on_actionPoints_triggered()
         });
         m_pointListEditDialog->setWindowTitle("Edit Points");
     }
-
-    m_pointListEditDialog->show();
-    m_pointListEditDialog->activateWindow();
-    m_pointListEditDialog->raise();
-    m_pointListEditDialog->setFocus();
+    showDialog(*m_pointListEditDialog);
 }
 
 void MainWindow::on_actionStep_triggered()
@@ -216,4 +220,50 @@ void MainWindow::on_runnerThread_stoppedRunnnig()
     qDebug() << "Finished";
     ui.runButton->setText("Run");
     ui.actionRun->setText("Run");
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    if(!m_config)
+    {
+        m_config = new ConfigDialog(this, m_solver.config());
+    }
+
+    showDialog(*m_config);
+}
+
+void MainWindow::on_actionImport_triggered()
+{
+    QString filepath = QFileDialog::getOpenFileName(this, "Open a CSV file", tr("CSV (*.csv)"));
+    if(filepath.isEmpty()) return;
+
+    std::ifstream file{filepath.toStdString()};
+    if(!file)
+    {
+        errorDialog("No such file");
+    }
+
+    PointList points;
+    std::string buffer;
+    while(std::getline(file, buffer))
+    {
+        int index = -1;
+        for(auto ch : buffer)
+        {
+            ++index;
+            if(ch == ' ' || ch == ',' || ch == '\t')
+            {
+                break;
+            }
+        }
+
+        auto x = boost::lexical_cast<int>(std::string(0, index - 1));
+        auto y = boost::lexical_cast<int>(std::string(index + 1, buffer.size() - 1));
+        points.emplace_back(x, y);
+    }
+
+    if(points.size() != 0)
+    {
+        setPointsToModel(std::move(points));
+    }
 }

@@ -32,7 +32,6 @@ public:
         
 
         // max/min random co-efficients
-        bool useMaxMinRandom = true;
         int minimumConstantValue = 0;
         int maximumConstantValue = 100;
         

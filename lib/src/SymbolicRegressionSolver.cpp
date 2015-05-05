@@ -15,10 +15,7 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
     m_points(points),
     m_randomEngine{m_randomDevice()}
 {
-    if(config.useMaxMinRandom)
-    {
-        m_constantDist = decltype(m_constantDist)(config.minimumConstantValue, config.maximumConstantValue);
-    }
+    m_constantDist = decltype(m_constantDist)(config.minimumConstantValue, config.maximumConstantValue);
 }
 
 void SymbolicRegressionSolver::reset()

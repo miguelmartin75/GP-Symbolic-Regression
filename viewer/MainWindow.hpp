@@ -3,6 +3,7 @@
 
 #include "ui_MainWindow.h"
 #include "PointListEditDialog.hpp"
+#include "ConfigDialog.hpp"
 
 #include <SymbolicRegressionSolver.hpp>
 
@@ -36,6 +37,10 @@ private slots:
 
     void on_runnerThread_stoppedRunnnig();
 
+    void on_actionPreferences_triggered();
+
+    void on_actionImport_triggered();
+
 private:
 
     void setPointsToModel(PointList points);
@@ -56,6 +61,7 @@ private:
     SymbolicRegressionSolver m_solver;
 
     PointListEditDialog* m_pointListEditDialog = nullptr;
+    ConfigDialog* m_config = nullptr;
 
     long long m_sleepAmount = 0;
 };
