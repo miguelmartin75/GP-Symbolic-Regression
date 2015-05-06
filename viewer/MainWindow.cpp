@@ -245,21 +245,31 @@ void MainWindow::on_actionImport_triggered()
 
     PointList points;
     std::string buffer;
-    while(std::getline(file, buffer))
+    try
     {
-        int index = -1;
-        for(auto ch : buffer)
+        while(std::getline(file, buffer))
         {
-            ++index;
-            if(ch == ' ' || ch == ',' || ch == '\t')
+            int index = -1;
+            for(auto ch : buffer)
             {
-                break;
+                ++index;
+                if(ch == ' ' || ch == ',' || ch == '\t')
+                {
+                    break;
+                }
             }
-        }
 
-        auto x = boost::lexical_cast<int>(std::string(0, index - 1));
-        auto y = boost::lexical_cast<int>(std::string(index + 1, buffer.size() - 1));
-        points.emplace_back(x, y);
+            std::string xAsStr{buffer.begin(), buffer.begin() + index};
+            std::string yAsStr{buffer.begin() + index + 1, buffer.end()};
+            auto x = boost::lexical_cast<int>(xAsStr);
+            auto y = boost::lexical_cast<int>(yAsStr);
+            points.emplace_back(x, y);
+        }
+    }
+    catch(boost::bad_lexical_cast& e)
+    {
+        std::string reason = e.what();
+        errorDialog(QString::fromStdString("Failed to read file. Reason " + reason));
     }
 
     if(points.size() != 0)
