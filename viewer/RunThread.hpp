@@ -33,7 +33,8 @@ private:
         m_solver.setIsRunning(true);
         while(m_solver.isRunning() &&
               m_solver.currentGeneration() < m_solver.config().maxGenerations &&
-              m_solver.currentSolutionSet().size() != 0)
+              m_solver.currentSolutionSet().size() != 0 &&
+              !m_solver.foundSolution())
         {
             m_solver.step();
 

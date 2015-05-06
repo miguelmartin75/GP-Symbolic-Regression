@@ -15,7 +15,6 @@ SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const P
     m_points(points),
     m_randomEngine{m_randomDevice()}
 {
-    m_constantDist = decltype(m_constantDist)(config.minimumConstantValue, config.maximumConstantValue);
 }
 
 void SymbolicRegressionSolver::reset()
@@ -116,7 +115,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                 useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
             }
 
-            mutate(m_randomEngine, solution.function, m_constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
+            mutate(m_randomEngine, solution.function, m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
             solution.fitnessLevel = fitness(solution.function);
             solution.mutated = true;
             newSolutions.emplace_back(solution);
@@ -137,7 +136,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                                 std::uniform_int_distribution<> dist(0, 2);
                                 if(dist(engine) <= 1)
                                 {
-                                    node = ::node<ValueNode>(m_constantDist(engine));
+                                    node = ::node<ValueNode>(m_config.constantDist(engine));
                                 }
                                 else
                                 {
@@ -238,5 +237,5 @@ Solution SymbolicRegressionSolver::randomlyGenerateSolution()
     std::uniform_int_distribution<> dist(1, m_config.initialMaxDepth);
     const int depthToGenerate = dist(m_randomEngine);
 
-    return createSolution(std::move(Function{generate(m_randomEngine, depthToGenerate, m_constantDist)}));
+    return createSolution(std::move(Function{generate(m_randomEngine, depthToGenerate, m_config.constantDist)}));
 }

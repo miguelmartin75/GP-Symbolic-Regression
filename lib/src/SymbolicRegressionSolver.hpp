@@ -32,8 +32,7 @@ public:
         
 
         // max/min random co-efficients
-        int minimumConstantValue = 0;
-        int maximumConstantValue = 100;
+        std::uniform_int_distribution<> constantDist{0, 100};
         
         size_t solutionCriterea = 0; /* 0 means fully successful */
 
@@ -74,6 +73,8 @@ public:
     Config& config() { return m_config; }
     const Config& config() const { return m_config; }
 
+    bool foundSolution() { return m_foundSolution; }
+
 private:
 
     void sort();
@@ -90,7 +91,6 @@ private:
  
     std::random_device m_randomDevice;
     RandomEngine m_randomEngine;
-    std::uniform_int_distribution<int> m_constantDist;
     int m_currentGeneration = 0;
     bool m_foundSolution = false;
     bool m_isRunning = false;

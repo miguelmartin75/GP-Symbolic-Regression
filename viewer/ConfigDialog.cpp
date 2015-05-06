@@ -26,10 +26,11 @@ ConfigDialog::ConfigDialog(QWidget *parent, ConfigDialog::Config& config) :
     ui.nearestNeighbourOptionCombo->setCurrentIndex(static_cast<int>(m_config.nearestNeighbourOption));
 
     ui.initialPopulationLineEdit->setText(QString::number(m_config.initialPopulation));
+    ui.maxGenLineEdit->setText(QString::number(m_config.maxGenerations));
     ui.initialDepthLineEdit->setText(QString::number(m_config.initialMaxDepth));
     ui.maxSolutionDepthLineEdit->setText(QString::number(m_config.maxSolutionDepth));
-    ui.minConstantValueLineEdit->setText(QString::number(m_config.minimumConstantValue));
-    ui.maxConstantValueLineEdit->setText(QString::number(m_config.maximumConstantValue));
+    ui.minConstantValueLineEdit->setText(QString::number(m_config.constantDist.a()));
+    ui.maxConstantValueLineEdit->setText(QString::number(m_config.constantDist.b()));
     ui.stepSizeLineEdit->setText(QString::number(m_config.stepSize));
 
     ui.keepPercentageLineEdit->setText(QString::number(m_config.keepPercentage));
@@ -42,13 +43,13 @@ ConfigDialog::ConfigDialog(QWidget *parent, ConfigDialog::Config& config) :
 
 int convertToInt(QLineEdit* lineEdit)
 {
-    assert(lineEdit == nullptr);
+    assert(lineEdit);
     return lineEdit->text().toInt();
 }
 
 double convertToDouble(QLineEdit* lineEdit)
 {
-    assert(lineEdit == nullptr);
+    assert(lineEdit);
     return lineEdit->text().toDouble();
 }
 
@@ -59,8 +60,9 @@ void ConfigDialog::on_buttonBox_accepted()
 
     m_config.initialMaxDepth = convertToInt(ui.initialDepthLineEdit);
     m_config.maxSolutionDepth = convertToInt(ui.maxSolutionDepthLineEdit);
-    m_config.minimumConstantValue = convertToInt(ui.minConstantValueLineEdit);
-    m_config.maximumConstantValue = convertToInt(ui.maxConstantValueLineEdit);
+
+    m_config.constantDist = decltype(m_config.constantDist){convertToInt(ui.minConstantValueLineEdit),
+                                                            convertToInt(ui.maxConstantValueLineEdit)};
     m_config.stepSize = convertToInt(ui.stepSizeLineEdit);
 
     m_config.keepPercentage = convertToDouble(ui.keepPercentageLineEdit);
