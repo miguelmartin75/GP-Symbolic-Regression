@@ -48,6 +48,15 @@ endif()
 
 include_directories(${GP_SYMB_REG_INCLUDE_DIR})
 
+#set(Boost_USE_STATIC_LIBS OFF)
+#set(Boost_USE_MULTITHREADED OFF)
+#set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost REQUIRED)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 # deduce the libraries suffix from the options
 set(FIND_GP_SYMB_REG_SUFFIX "")
 if(GP_SYMB_REG_USE_STATIC_LIB)

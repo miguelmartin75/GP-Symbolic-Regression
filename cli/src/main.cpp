@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include <string>
+
+#include <boost/lexical_cast.hpp>
 
 #include "Point.hpp"
 #include "Function.hpp"
@@ -17,6 +20,8 @@ Function fn{"(+ 1 x)"};
 int initialPoint = -10;
 int endPoint = 10;
 int stepSize = 2;
+
+std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config);
 
 void parseArguments(int argc, char *argv[]);
 void printValidFlags()
@@ -156,8 +161,26 @@ void parseArguments(int argc, char *argv[])
                 }
                 break;
             case 'c':
-                std::cout << "TODO\n";
-                std::exit(-3);
+                {
+                    try 
+                    {
+                        std::string filepath = argv[++i];
+                        std::ifstream file;
+                        file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+                        file.open(filepath);
+                        file >> config; // read the config
+                    } 
+                    catch(boost::bad_lexical_cast& e)
+                    {
+                        std::cerr << e.what();
+                        std::exit(5);
+                    }
+                    catch(std::exception& e)
+                    {
+                        std::cerr << e.what();
+                        std::exit(6);
+                    }
+                }
                 break;
             default:
                 std::cout << "Invalid flag\n";
@@ -166,4 +189,54 @@ void parseArguments(int argc, char *argv[])
                 break;
         }
     }
+}
+
+namespace 
+{
+std::string obtainValue(const std::string& line)
+{
+    return std::string(line.begin() + line.find_last_of('='), line.end());
+}
+
+template <class T>
+void read(std::string& buffer, std::istream& is, T& value)
+{
+    std::getline(is, buffer);
+    value = boost::lexical_cast<T>(obtainValue(buffer));
+}
+
+}
+
+std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config)
+{
+    std::string buffer;
+
+    read(buffer, is, config.initialPopulation);
+    read(buffer, is, config.maxGenerations);
+    read(buffer, is, config.initialMaxDepth);
+    read(buffer, is, config.maxSolutionDepth);
+    read(buffer, is, config.keepPercentage);
+    read(buffer, is, config.mutationPercent);
+    read(buffer, is, config.matePercent);
+
+
+    // have to do this separately for const dist
+    int a, b;
+    read(buffer, is, a);
+    read(buffer, is, b);
+
+    config.constantDist = decltype(config.constantDist){a, b};
+
+    read(buffer, is, config.solutionCriterea);
+    read(buffer, is, config.chanceToChangeConstant);
+    read(buffer, is, config.chanceToChangeVar);
+    
+    int nearestNeighbour = 0;
+    read(buffer, is, nearestNeighbour);
+    config.nearestNeighbourOption = static_cast<decltype(config.nearestNeighbourOption)>(config.nearestNeighbourOption);
+
+    read(buffer, is, config.chanceToUseNearestNeighbour);
+    read(buffer, is, config.stepSize);
+    
+    return is;
 }
