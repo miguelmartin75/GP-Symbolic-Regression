@@ -13,23 +13,26 @@ public:
 
     struct Config
     {
-#ifdef ONE_POPULATION
-        int initialPopulation = 1;
-#else
-        int initialPopulation = 1600;
-#endif
-        int maxGenerations = 300;
+        int initialPopulation = 1000;
+
+        int maxGenerations = 100;
         int initialMaxDepth = 5;
         int maxSolutionDepth = 20;
 
         // TODO: random removes from various positions
         float keepPercentage = 0.10f;
 
-        // if these three numbers do not add up to 1.0
+        // if these two numbers do not add up to 1.0
         // then it is assumed that we will duplicate for the rest of it
         float mutationPercent = 0.45f;
         float matePercent = 0.45f;
-        
+
+        enum class PopulationRefillOption
+        {
+            REFILL,
+            DUPLICATE,
+            THROW_AWAY
+        } populationRefillOption = PopulationRefillOption::REFILL;
 
         // max/min random co-efficients
         std::uniform_int_distribution<> constantDist{0, 100};
@@ -45,6 +48,7 @@ public:
             NEVER_USE,
             RANDOM
         } nearestNeighbourOption = NearestNeighbourOption::RANDOM;
+
         double chanceToUseNearestNeighbour = 0.7;
         int stepSize = 1; /* step for nearest neightbour */
     };
@@ -52,6 +56,7 @@ public:
     SymbolicRegressionSolver();
     SymbolicRegressionSolver(const Config& config, const PointList& points);
 
+    void performMutation(Solution& s);
     void step();
     int currentGeneration() const { return m_currentGeneration; }
     void reset();

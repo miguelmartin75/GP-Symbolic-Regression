@@ -24,14 +24,9 @@ endif()
 
 set(BUILD_SHARED_LIBS true CACHE BOOL "A flag to build shared (dynamic) libs")
 set(VERBOSE_LOG false CACHE BOOL "Verbose logging")
-set(ONE_POPULATION false CACHE BOOL "One population")
 
 if(VERBOSE_LOG)
     set(VERBOSE_LOG true)
-endif()
-
-if(ONE_POPULATION)
-    set(ONE_POPULATION true)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Config.hpp.inl ${CMAKE_CURRENT_SOURCE_DIR}/src/Config.hpp)

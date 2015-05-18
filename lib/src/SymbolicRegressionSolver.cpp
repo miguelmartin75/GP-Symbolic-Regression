@@ -30,9 +30,6 @@ void SymbolicRegressionSolver::reset()
 
 void SymbolicRegressionSolver::step()
 {
-    m_isReset = false;
-    m_currentGeneration++;
-
     /*
        std::cout << "Best solution for generation " << m_currentGeneration << " is: ";
        std::cout << m_solutions[0].function;
@@ -42,17 +39,22 @@ void SymbolicRegressionSolver::step()
     {
         m_solutions.erase(std::remove_if(m_solutions.begin(),
                     m_solutions.end(),
-                    [&](const Solution& sol) -> bool
+                    [&](const Solution& sol)
                     {
-                        return sol.fitnessLevel > m_config.solutionCriterea;
+                    return sol.fitnessLevel > m_config.solutionCriterea;
                     }), m_solutions.end());
         m_foundSolution = true;
         return;
     }
 
-#ifndef ONE_POPULATION
-    m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * m_config.keepPercentage), m_solutions.end());
-#endif
+    m_isReset = false;
+    m_currentGeneration++;
+
+
+    if(m_config.initialPopulation != 1)
+    {
+        m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * m_config.keepPercentage), m_solutions.end());
+    }
 
     m_solutions = performGeneticOperations();
 
@@ -64,7 +66,7 @@ void SymbolicRegressionSolver::sort()
     std::sort(m_solutions.begin(), m_solutions.end(),
             [](const Solution& s1, const Solution& s2) -> bool
             {
-                return s1.fitnessLevel < s2.fitnessLevel;
+            return s1.fitnessLevel < s2.fitnessLevel;
             });
 }
 
@@ -100,31 +102,15 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         std::cout << "fn: " << solution.function << '\n';
 #endif
         auto randomNumber = dist(engine);
-#ifndef ONE_POPULATION
-        if(randomNumber <= m_config.mutationPercent)
-#endif
+        if(m_config.initialPopulation == 1 || randomNumber <= m_config.mutationPercent)
         {
-
-            bool useNearestNeighbour = false;
-            if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::ALWAYS_USE)
-            {
-                useNearestNeighbour = true;
-            }
-            else if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::RANDOM)
-            {
-                useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
-            }
-
-            mutate(m_randomEngine, solution.function, m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
-            solution.fitnessLevel = fitness(solution.function);
-            solution.mutated = true;
+            performMutation(solution);
             newSolutions.emplace_back(solution);
-
-#ifdef VERBOSE_LOG
-            std::cout << "mutated: " << solution.function << '\n';
-#endif // VERBOSE_LOG
         }
-#ifndef ONE_POPULATION
+
+        if(m_config.initialPopulation == 1)
+            continue;
+
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
             matingList.emplace_back(&solution.function);
@@ -138,11 +124,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                                 {
                                     node = ::node<ValueNode>(m_config.constantDist(engine));
                                 }
-                                else
-                                {
-                                    node = ::node<VariableNode>("x");
-                                }
-                                return node;
+                            else
+                            {
+                                node = ::node<VariableNode>("x");
+                            }
+                            return node;
                             }, m_config.maxSolutionDepth));
                 sol.mated = true;
                 newSolutions.emplace_back(sol);
@@ -150,7 +136,6 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 #ifdef VERBOSE_LOG
                 std::cout << "mating " << solution.function;
 #endif 
-
                 matingList.clear();
             }
         }
@@ -158,9 +143,9 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             newSolutions.emplace_back(solution);
         }
-#endif
     }
 
+    // TODO: change this behaviour if 
     for(size_t i = 0; i < m_config.initialPopulation - newSolutions.size(); ++i)
     {
         newSolutions.emplace_back(randomlyGenerateSolution());
@@ -168,6 +153,28 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 
     return newSolutions;
 }
+
+void SymbolicRegressionSolver::performMutation(Solution& solution)
+{
+    bool useNearestNeighbour = false;
+    if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::ALWAYS_USE)
+    {
+        useNearestNeighbour = true;
+    }
+    else if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::RANDOM)
+    {
+        useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
+    }
+
+    mutate(m_randomEngine, solution.function, m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
+    solution.fitnessLevel = fitness(solution.function);
+    solution.mutated = true;
+
+#ifdef VERBOSE_LOG
+    std::cout << "mutated: " << solution.function << '\n';
+#endif // VERBOSE_LOG
+}
+
 
 void SymbolicRegressionSolver::populate()
 {
