@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 #include <boost/lexical_cast.hpp>
 
@@ -195,16 +196,17 @@ namespace
 {
 std::string obtainValue(const std::string& line)
 {
-    return std::string(line.begin() + line.find_last_of('='), line.end());
+    return std::string(line.begin() + line.find_last_of('=') + 1, line.end());
 }
 
 template <class T>
 void read(std::string& buffer, std::istream& is, T& value)
 {
     std::getline(is, buffer);
-    value = boost::lexical_cast<T>(obtainValue(buffer));
+    auto stringValue = obtainValue(buffer);
+    stringValue.erase(std::remove_if(stringValue.begin(), stringValue.end(), [](char c) { return std::isspace(c); }), stringValue.end());
+    value = boost::lexical_cast<T>(stringValue);
 }
-
 }
 
 std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config)
