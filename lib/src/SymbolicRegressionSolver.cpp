@@ -50,12 +50,6 @@ void SymbolicRegressionSolver::step()
     m_isReset = false;
     m_currentGeneration++;
 
-
-    if(m_config.initialPopulation != 1)
-    {
-        m_solutions.erase(m_solutions.begin() + (int)(m_solutions.size() * m_config.keepPercentage), m_solutions.end());
-    }
-
     m_solutions = performGeneticOperations();
 
     sort();
@@ -96,8 +90,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
     RandomEngine engine(m_randomDevice());
     std::uniform_real_distribution<> dist(0, 1);
 
-    for(auto& solution : m_solutions)
+    auto endIt = m_solutions.begin() + (size_t)(m_solutions.size() * m_config.keepPercentage);
+
+    for(auto it = m_solutions.begin(); it != endIt; ++it)
     {
+        auto& solution = *it;
 #ifdef VERBOSE_LOG
         std::cout << "fn: " << solution.function << '\n';
 #endif
@@ -145,10 +142,23 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         }
     }
 
-    // TODO: change this behaviour if 
-    for(size_t i = 0; i < m_config.initialPopulation - newSolutions.size(); ++i)
+    if(m_config.populationRefillOption == Config::PopulationRefillOption::DUPLICATE)
     {
-        newSolutions.emplace_back(randomlyGenerateSolution());
+        for(auto& it = endIt; it != m_solutions.end(); ++it)
+        {
+            newSolutions.emplace_back(*it);
+        }
+    }
+    else if(m_config.populationRefillOption == Config::PopulationRefillOption::REFILL)
+    {
+        for(size_t i = 0; i < m_config.initialPopulation - newSolutions.size(); ++i)
+        {
+            newSolutions.emplace_back(randomlyGenerateSolution());
+        }
+    }
+    else
+    {
+        // do nothing
     }
 
     return newSolutions;
