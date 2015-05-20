@@ -11,8 +11,6 @@
 #include "SymbolicRegressionSolver.hpp"
 #include "Config.hpp"
 
-#include "string_utils.hpp"
-
 //#define VERBOSE_LOG
 
 int amountOfSimulationsToPerform = 1;
@@ -140,25 +138,25 @@ void parseArguments(int argc, char *argv[])
             case 'i':
                 {
                     std::string str = argv[++i];
-                    initialPoint = util::from_string<int>(str);
+                    initialPoint = boost::lexical_cast<int>(str);
                 }
                 break;
             case 'e':
                 {
                     std::string str = argv[++i];
-                    endPoint = util::from_string<int>(str);
+                    endPoint = boost::lexical_cast<int>(str);
                 }
                 break;
             case 's':
                 {
                     std::string str = argv[++i];
-                    stepSize = util::from_string<int>(str);
+                    stepSize = boost::lexical_cast<int>(str);
                 }
                 break;
             case 'r':
                 {
                     std::string str = argv[++i];
-                    amountOfSimulationsToPerform = util::from_string<int>(str);
+                    amountOfSimulationsToPerform = boost::lexical_cast<int>(str);
                 }
                 break;
             case 'c':
