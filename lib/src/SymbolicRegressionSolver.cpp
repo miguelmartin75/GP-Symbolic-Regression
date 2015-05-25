@@ -41,7 +41,7 @@ void SymbolicRegressionSolver::step()
                     m_solutions.end(),
                     [&](const Solution& sol)
                     {
-                    return sol.fitnessLevel > m_config.solutionCriterea;
+                        return sol.fitnessLevel > m_config.solutionCriterea;
                     }), m_solutions.end());
         m_foundSolution = true;
         return;
@@ -58,9 +58,9 @@ void SymbolicRegressionSolver::step()
 void SymbolicRegressionSolver::sort()
 {
     std::sort(m_solutions.begin(), m_solutions.end(),
-            [](const Solution& s1, const Solution& s2) -> bool
+            [](const Solution& s1, const Solution& s2)
             {
-            return s1.fitnessLevel < s2.fitnessLevel;
+                return s1.fitnessLevel < s2.fitnessLevel;
             });
 }
 
