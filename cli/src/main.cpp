@@ -233,10 +233,14 @@ std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& con
     
     int nearestNeighbour = 0;
     read(buffer, is, nearestNeighbour);
-    config.nearestNeighbourOption = static_cast<decltype(config.nearestNeighbourOption)>(config.nearestNeighbourOption);
+    config.nearestNeighbourOption = static_cast<decltype(config.nearestNeighbourOption)>(nearestNeighbour);
 
     read(buffer, is, config.chanceToUseNearestNeighbour);
     read(buffer, is, config.stepSize);
+    
+    int refillOption = 0;
+    read(buffer, is, refillOption);
+    config.populationRefillOption = static_cast<decltype(config.populationRefillOption)>(refillOption);
     
     return is;
 }
