@@ -1,3 +1,4 @@
+#!/bin/zsh
 COMMAND='./build/gp_symb_reg_cli'
 
 FILE=$1
