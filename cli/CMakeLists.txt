@@ -24,23 +24,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 
-set(BUILD_SHARED_LIBS true CACHE BOOL "A flag to build shared (dynamic) libs")
 set(GP_SYMB_REG_INCLUDE_DIR "../lib/src" CACHE STRING "The include directory of gp_symb_reg")
 set(GP_SYMB_REG_LIB_DIR "../lib/build" CACHE STRING "The lib directory of gp_symb_reg")
 set(GP_SYMB_REG_LIB_BASE_NAME "gp_symb_reg" CACHE STRING "The base name of the compiled library gp_symb_reg")
 set(GP_SYMB_REG_USE_STATIC_LIB false CACHE BOOL "Whether or not to use static libraries")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-
-# Determine if we're building a shared (dynamic) library
-# And set appropriate suffixes for the executables
-if(BUILD_SHARED_LIBS)
-    set(CMAKE_DEBUG_POSTFIX "_d")
-else()
-    add_definitions(-DSTATIC_LIB)
-    set(CMAKE_DEBUG_POSTFIX "_d_s")
-    set(CMAKE_RELEASE_POSTFIX "_s")
-endif()
 
 # ================= #
 # Dependencies      #
