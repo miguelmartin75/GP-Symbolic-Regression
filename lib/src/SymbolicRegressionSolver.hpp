@@ -27,13 +27,6 @@ public:
         float mutationPercent = 0.45f;
         float matePercent = 0.45f;
 
-        enum class PopulationRefillOption
-        {
-            REFILL,
-            DUPLICATE,
-            THROW_AWAY
-        } populationRefillOption = PopulationRefillOption::REFILL;
-
         // max/min random co-efficients
         std::uniform_int_distribution<> constantDist{0, 100};
         
@@ -51,6 +44,13 @@ public:
 
         double chanceToUseNearestNeighbour = 0.7;
         int stepSize = 1; /* step for nearest neightbour */
+
+        enum class PopulationRefillOption
+        {
+            REFILL,
+            DUPLICATE,
+            THROW_AWAY
+        } populationRefillOption = PopulationRefillOption::REFILL;
     };
 
     SymbolicRegressionSolver();
