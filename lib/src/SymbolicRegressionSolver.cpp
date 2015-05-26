@@ -30,6 +30,9 @@ void SymbolicRegressionSolver::reset()
 
 void SymbolicRegressionSolver::step()
 {
+    assert(m_solutions.size() != 0 && "solution size is 0");
+
+    */
     /*
        std::cout << "Best solution for generation " << m_currentGeneration << " is: ";
        std::cout << m_solutions[0].function;
@@ -50,7 +53,9 @@ void SymbolicRegressionSolver::step()
     m_isReset = false;
     m_currentGeneration++;
 
+    //std::cout << "Previous solution size: " << m_solutions.size() << '\n';
     m_solutions = performGeneticOperations();
+    //std::cout << "New solution size: " << m_solutions.size() << '\n';
 
     sort();
 }
