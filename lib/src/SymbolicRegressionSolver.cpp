@@ -32,7 +32,6 @@ void SymbolicRegressionSolver::step()
 {
     assert(m_solutions.size() != 0 && "solution size is 0");
 
-    */
     /*
        std::cout << "Best solution for generation " << m_currentGeneration << " is: ";
        std::cout << m_solutions[0].function;
