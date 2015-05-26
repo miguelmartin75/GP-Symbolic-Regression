@@ -68,11 +68,9 @@ void performSimulation(const PointList& points)
     SymbolicRegressionSolver solver(config, points);
     auto solutions = solver.solve();
 
-    if(solutions.size() == 0)
+    if(!solver.foundSolution())
     {
-#ifdef VERBOSE_LOG
-        std::cout << "No solution!\n";
-#endif // VERBOSE_LOG
+//        std::cout << "No solution!\n";
         return;
     }
 
