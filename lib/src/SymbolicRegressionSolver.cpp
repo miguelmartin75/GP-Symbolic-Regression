@@ -125,11 +125,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                                 {
                                     node = ::node<ValueNode>(m_config.constantDist(engine));
                                 }
-                            else
-                            {
-                                node = ::node<VariableNode>("x");
-                            }
-                            return node;
+                                else
+                                {
+                                    node = ::node<VariableNode>("x");
+                                }
+                                return node;
                             }, m_config.maxSolutionDepth));
                 sol.mated = true;
                 newSolutions.emplace_back(sol);
