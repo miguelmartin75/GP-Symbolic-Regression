@@ -15,7 +15,7 @@
 
 int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
-Function fn{"(+ 1 x)"};
+Function fn{parse("+ 1 x").statement, "x"};
 int initialPoint = -10;
 int endPoint = 10;
 int stepSize = 2;
@@ -50,9 +50,10 @@ int main(int argc, char *argv[])
     std::vector<Point> points;
     points.reserve((endPoint - initialPoint)/stepSize);
 
+    VariableMap map;
     for(int i = initialPoint; i <= endPoint; i += stepSize)
     {
-        points.emplace_back(i, fn(i));
+        points.emplace_back(i, fn(map, i));
     }
 
     for(int i = 0; i < amountOfSimulationsToPerform; ++i)

@@ -264,6 +264,8 @@ NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<
             ASSERT(true, "invalid type generated in generate");
             break;
     }
+
+    return nullptr;
 }
 
 Solution SymbolicRegressionSolver::randomlyGenerateSolution()
