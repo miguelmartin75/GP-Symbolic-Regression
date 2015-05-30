@@ -41,6 +41,8 @@ private slots:
 
     void on_actionImport_triggered();
 
+    void on_sleepSlider_valueChanged(int value);
+
 private:
 
     void setPointsToModel(PointList points);
@@ -62,6 +64,7 @@ private:
 
     PointListEditDialog* m_pointListEditDialog = nullptr;
     ConfigDialog* m_config = nullptr;
+    VariableMap m_variableMap;
 
     long long m_sleepAmount = 0;
 };

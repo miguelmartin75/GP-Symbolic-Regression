@@ -27,9 +27,10 @@ void GeneratePointDialog::on_addPointsButton_clicked()
 
     bool failed = false;
     PointList pointsToAdd;
+    VariableMap map;
     for(int i = m_start; i < m_end; i += m_stepSize)
     {
-        auto y = function(i);
+        auto y = function(map, i);
         auto it = std::find_if(m_points.begin(), m_points.end(),
                                [&](const Point& p) { return p.x == i; });
 
@@ -64,9 +65,10 @@ void GeneratePointDialog::on_eraseAndAddButton_clicked()
     updateVars();
 
     m_points.clear();
+    VariableMap map;
     for(int i = m_start; i < m_end; i += m_stepSize)
     {
-        m_points.emplace_back(i, function(i));
+        m_points.emplace_back(i, function(map,i));
     }
 
     emit addedPoints();

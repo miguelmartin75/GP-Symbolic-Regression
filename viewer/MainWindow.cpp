@@ -1,6 +1,8 @@
 #include "MainWindow.hpp"
 
 #include <fstream>
+#include <cctype>
+
 #include <boost/lexical_cast.hpp>
 
 #include "PointListEditDialog.hpp"
@@ -42,14 +44,14 @@ void MainWindow::initGraph()
 
     ui.plotWidget->graph(GRAPH_DATA_TO_PLOT)->setPen(QPen(QColor(200, 50, 0)));
 
-    Function fn{"(+ x 1)"};
+    Function fn{parse("(+ x 1)").statement};
 
     const int start = -10;
     const int end = 10;
     PointList temp;
     for(int i = start; i <= end; i += 2)
     {
-        temp.emplace_back(i, fn(i));
+        temp.emplace_back(i, fn(m_variableMap, i));
     }
 
     setPointsToModel(std::move(temp));
@@ -94,7 +96,7 @@ void MainWindow::updateGraph(int graph, int index)
 
     for(auto& point : m_solver.points())
     {
-        g->addData(point.x, fn(point.x));
+        g->addData(point.x, fn(m_variableMap, point.x));
     }
     ui.plotWidget->replot();
     std::cout << "Updated graph " << fn << std::endl;
@@ -150,10 +152,17 @@ void MainWindow::updateInterface()
     ui.solutionsList->clear();
     for(auto& solution : m_solver.currentSolutionSet())
     {
-        std::string str = "[" + boost::lexical_cast<std::string>(solution.fitnessLevel) + "] - " +
-                          boost::lexical_cast<std::string>(solution.function) ;
+        try
+        {
+            std::string str = "[" + boost::lexical_cast<std::string>(solution.fitnessLevel) + "] - " +
+                              boost::lexical_cast<std::string>(solution.function) ;
 
-        ui.solutionsList->addItem(QString{str.c_str()});
+            ui.solutionsList->addItem(QString{str.c_str()});
+        }
+        catch(...)
+        {
+            qDebug() << "Exception caught!";
+        }
     }
 
     ui.currentGenerationLabel->setText("Current Generation: " + QString::number(m_solver.currentGeneration()));
@@ -253,7 +262,7 @@ void MainWindow::on_actionImport_triggered()
             for(auto ch : buffer)
             {
                 ++index;
-                if(ch == ' ' || ch == ',' || ch == '\t')
+                if(std::isspace(ch) || ch == ',')
                 {
                     break;
                 }
@@ -276,4 +285,10 @@ void MainWindow::on_actionImport_triggered()
     {
         setPointsToModel(std::move(points));
     }
+}
+
+void MainWindow::on_sleepSlider_valueChanged(int value)
+{
+    m_sleepAmount = value;
+    ui.sleepLabel->setText(QString::fromStdString("Sleep Amount " + boost::lexical_cast<std::string>(value) + " ms"));
 }
