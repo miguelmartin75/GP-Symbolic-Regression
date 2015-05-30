@@ -1,13 +1,15 @@
 #ifndef POINT_HPP
 #define POINT_HPP
 
+#include "Config.hpp"
+
 struct Point
 {
     Point() : x(0), y(0) {}
-    Point(int x, int y) : x(x), y(y) {}
+    Point(Value x, Value y) : x(x), y(y) {}
 
-    int x;
-    int y;
+    Value x;
+    Value y;
 };
 
 inline bool operator<(const Point& p1, const Point& p2)
