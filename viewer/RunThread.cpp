@@ -9,6 +9,7 @@ void RunThread::run()
           m_solver.currentSolutionSet().size() != 0 &&
           !m_solver.foundSolution())
     {
+        qDebug() << "Stepping...\n";
         m_solver.step();
 
         emit stepOccured();
@@ -16,7 +17,8 @@ void RunThread::run()
         if(m_sleepAmount)
         {
             qDebug() << "sleeping for amount: " << QString::number(m_sleepAmount);
-            QThread::currentThread()->sleep(m_sleepAmount);
+            QThread::msleep(m_sleepAmount);
+            qDebug() << "done sleeping...\n";
         }
     }
 
