@@ -37,9 +37,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 include_directories(${GP_SYMB_REG_INCLUDE_DIR})
 
-#set(Boost_USE_STATIC_LIBS OFF)
-#set(Boost_USE_MULTITHREADED OFF)
-#set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost REQUIRED)
 
 if(Boost_FOUND)
