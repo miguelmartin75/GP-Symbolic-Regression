@@ -261,9 +261,7 @@ NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<
                         std::move(generate(engine, depth - 1, constantDist)));
             }
         default:
-            std::cerr << "Invalid type generated\n";
-            std::exit(1);
-            return nullptr;
+            ASSERT(true, "invalid type generated in generate");
             break;
     }
 }
