@@ -1,14 +1,12 @@
 #include "Parser.hpp"
 
-#include <iostream>
 #include <stack>
 #include <queue>
 
+#include <boost/lexical_cast.hpp>
+
 #include "Lexer.hpp"
 #include "Node.hpp"
-
-#include "../string_utils.hpp"
-
 
 enum class NodeType
 {
@@ -30,6 +28,7 @@ ParseResult parse(std::string source)
     ParseResult result;
     auto tokens = tokenize(std::move(source)).tokens;
     result.statement = nextNode(tokens.begin(), tokens.end(), result.vars).node;
+
     return result;
 }
 
@@ -50,13 +49,13 @@ NodeData nextNode(TokenList::iterator begin, TokenList::iterator end, VariableMa
                 {
                     auto leftNodeData = nextNode(begin + 1, end, map);
                     auto rightNodeData = nextNode(leftNodeData.iteratorToGetNode + 1, end, map);
-                    return NodeData{node<OperatorNode>(util::from_string<Operator>(token.source), std::move(leftNodeData.node), std::move(rightNodeData.node)),
+                    return NodeData{node<OperatorNode>(boost::lexical_cast<Operator>(token.source), std::move(leftNodeData.node), std::move(rightNodeData.node)),
                                     rightNodeData.iteratorToGetNode};
                 }
                 break;
             case Token::Type::NUMBER:
                 {
-                    return NodeData{node<ValueNode>(util::from_string<int>(token.source)), begin};
+                    return NodeData{node<ValueNode>(boost::lexical_cast<int>(token.source)), begin};
                 }
                 break;
             case Token::Type::VARIABLE:
@@ -74,32 +73,33 @@ NodeData nextNode(TokenList::iterator begin, TokenList::iterator end, VariableMa
 
 std::string nextNode(const NodePtr& node)
 {
-    if(!node) return "";
+    if(!node) return std::string{""};
     
     switch(node->type())
     {
         case Node::Type::OPERATION:
             {
                 auto& castedNode = *static_cast<OperatorNode*>(node.get());
-                if(castedNode.left == nullptr || castedNode.right == nullptr) return "null";
-                return "(" + util::to_string<std::string>(castedNode.op) + " " +
+                if(castedNode.left == nullptr || castedNode.right == nullptr) 
+                    return std::string{"null"};
+                return "(" + boost::lexical_cast<std::string>(castedNode.op) + " " +
                         nextNode(castedNode.left) + " " + nextNode(castedNode.right) + ")";
             }
             break;
         case Node::Type::VALUE:
             {
                 auto& castedNode = *static_cast<ValueNode*>(node.get());
-                return util::to_string<std::string>(castedNode.value);
+                return boost::lexical_cast<std::string>(castedNode.value);
             }
            break;
         case Node::Type::VARIABLE:
             {
                 auto& castedNode = *static_cast<VariableNode*>(node.get());
-                return util::to_string<std::string>(castedNode.id);
+                return boost::lexical_cast<std::string>(castedNode.id);
             }
             break;
         default:
-            return std::string("invalid node");
+            return std::string{"invalid node"};
     }
 }
 

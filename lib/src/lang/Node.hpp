@@ -5,10 +5,10 @@
 #include <utility>
 
 #include "../Assert.hpp"
+#include "../Config.hpp"
 
 #include "Operator.hpp"
 #include "Variable.hpp"
-
 
 struct Node;
 using NodePtr = std::unique_ptr<Node>;
@@ -24,7 +24,7 @@ struct Node
     };
 
     virtual Type type() const = 0;
-    virtual int eval(const VariableMap* map) const = 0;
+    virtual Value eval(const VariableMap* map) const = 0;
     virtual NodePtr clone() const = 0;
     virtual ~Node() { }
 };
@@ -50,7 +50,7 @@ struct ValueNode : public Node
         return Type::VALUE;
     }
 
-    virtual int eval(const VariableMap* map) const override
+    virtual Value eval(const VariableMap* map) const override
     {
         return value;
     }
@@ -60,9 +60,9 @@ struct ValueNode : public Node
 
 struct VariableNode : public Node
 {
-    Variable id;
+    VariableName id;
 
-    VariableNode(const Variable& id) : id(id) {}
+    VariableNode(const VariableName& id) : id(id) {}
 
     virtual ~VariableNode() { }
 
@@ -71,7 +71,7 @@ struct VariableNode : public Node
         return Type::VARIABLE;
     }
 
-    virtual int eval(const VariableMap* map) const override
+    virtual Value eval(const VariableMap* map) const override
     {
         return map != nullptr && map->find(id) == map->end() ? 0 : map->at(id);
     }
@@ -98,7 +98,7 @@ struct OperatorNode : public Node
         return Type::OPERATION;
     }
 
-    virtual int eval(const VariableMap* map) const override
+    virtual Value eval(const VariableMap* map) const override
     {
         // special case for division and variable nodes. i.e. x/x == 1 for all x in real (including 0)
         if(op == Operator::DIVIDE_SAFE)/*|| op == Operator::DIVIDE)*/

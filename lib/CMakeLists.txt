@@ -12,6 +12,12 @@ project (gp_symb_reg)
 # Build Option      #
 # ================= #
 
+find_package(Boost REQUIRED)
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 # default to a debug build if no CMAKE_BUILD_TYPE is defined
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to 'Debug' as none was specified.")
@@ -28,6 +34,10 @@ set(VERBOSE_LOG false CACHE BOOL "Verbose logging")
 if(VERBOSE_LOG)
     set(VERBOSE_LOG true)
 endif()
+
+
+set(SCALAR_TYPE int CACHE STRING "Choose the type of scalar you want to use")
+set_property(CACHE SCALAR_TYPE PROPERTY STRINGS "int" "float" "double")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/Config.hpp.inl ${CMAKE_CURRENT_SOURCE_DIR}/src/Config.hpp)
 

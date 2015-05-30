@@ -4,7 +4,9 @@
 #include <string>
 #include <map>
 
-using Variable = std::string;
-using VariableMap = std::map<Variable, int>;
+#include "../Config.hpp"
+
+using VariableName = std::string;
+using VariableMap = std::map<VariableName, Value>;
 
 #endif // VARIABLE_HPP

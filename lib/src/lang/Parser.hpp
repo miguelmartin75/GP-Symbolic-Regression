@@ -38,7 +38,6 @@ struct ParseResult
         statement(std::move(p.statement)),
         vars(std::move(p.vars))
     {
-        
     }
     
     ParseResult& operator=(ParseResult&& p)
@@ -56,8 +55,9 @@ struct ParseResult
     VariableMap vars;  // the variables associated with the statement
 };
 
+// both functions may throw a boost::bad_lexical_cast if we
+// cannot convert something appropriately.
 ParseResult parse(std::string source);
-
 std::string reverse_parse(const NodePtr& node);
 
 #endif // PARSER_HPP

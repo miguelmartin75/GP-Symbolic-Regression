@@ -3,4 +3,6 @@
 
 #cmakedefine VERBOSE_LOG @VERBOSE_LOG@
 
+using Value = @SCALAR_TYPE@;
+
 #endif // CONFIG_HPP
