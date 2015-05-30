@@ -5,7 +5,7 @@
 #include "Config.hpp"
 #include "Types.hpp"
 
-#include "random_utils.hpp"
+#include "RandomUtils.hpp"
 
 class SymbolicRegressionSolver
 {
@@ -87,19 +87,24 @@ private:
     SolutionList performGeneticOperations();
     Solution randomlyGenerateSolution();
     void updateFitnesses();
-    size_t fitness(Function& fn) const;
-    Solution createSolution(Function fn) const;
-    
+    size_t fitness(const Function& fn);
+    Solution createSolution(Function fn);
+    bool checkForSolution();
+
+    std::random_device m_randomDevice;
+    RandomEngine m_randomEngine;
+
     Config m_config;
     PointList m_points;
     SolutionList m_solutions;
- 
-    std::random_device m_randomDevice;
-    RandomEngine m_randomEngine;
+
     int m_currentGeneration = 0;
     bool m_foundSolution = false;
     bool m_isRunning = false;
     bool m_isReset = false;
+
+
+    VariableMap m_variableMap;
 };
 
 #endif // SYMBOLICREGRESSIONSOLVER_HPP

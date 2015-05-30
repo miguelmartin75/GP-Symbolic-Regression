@@ -47,22 +47,18 @@ int nodeCount(const NodePtr& node);
 
 std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node);
 
-Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize)
+void mutate(RandomEngine& engine, NodePtr& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize)
 {
     static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
 
-    auto nodesToChange = randomNodes(engine, fn.getNode());
+    auto nodesToChange = randomNodes(engine, fn);
     std::uniform_int_distribution<> changeVarDist(0, chanceToChangeVar);
     std::uniform_int_distribution<> changeConstantDist(0, chanceToChangeConstant);
 
-    if(fn.getNode().get() == nullptr)
-    {
-        std::cout << "wotttttt" << std::endl;
-        return fn;
-    }
+    ASSERT(fn != nullptr, "function is null");
     
     int currentNode = -1;
-    visit(fn.getNode(), [&](NodePtr& node)
+    visit(fn, [&](NodePtr& node)
             {
                 ++currentNode;
                 // if we shouldn't change this node...
@@ -115,7 +111,6 @@ Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distributi
                         break;
                 }
             });
-    return fn;
 }
 
 int depth(const NodePtr& node)
@@ -162,10 +157,10 @@ std::vector<int> randomNodes(RandomEngine& engine, const NodePtr& node)
     return nodes;
 }
 
-Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std::function<NodePtr()> nodeCreator, int maxDepth)
+NodePtr mate(RandomEngine& engine, const NodePtr& p1, const NodePtr& p2, std::function<NodePtr()> nodeCreator, int maxDepth)
 {
-    const Function* parents[] = { &p1, &p2 };
-    std::vector<int> nodesToChange[] = { randomNodes(engine, p1.getNode()), randomNodes(engine, p2.getNode()) };
+    const NodePtr *const parents[] = { &p1, &p2 };
+    std::vector<int> nodesToChange[] = { randomNodes(engine, p1), randomNodes(engine, p2) };
 
     NodePtr rootNode = nullptr;
     std::vector<NodePtr> operators;
@@ -177,7 +172,7 @@ Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std:
         auto& parent = *parents[i];
         int currentNode = -1;
 
-        visit(parent.getNode(), [&](const NodePtr& node)
+        visit(parent, [&](const NodePtr& node)
                 {
                     ++currentNode;
                     if(!util::contains(listOfNodes, currentNode))
@@ -201,7 +196,6 @@ Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std:
                 }
         );
     }
-    
     
     for(auto& op : operators)
     {
@@ -244,15 +238,17 @@ Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std:
             add(engine, rootNode, std::move(right->clone()));
     }
     
-    
     // just add the rest of the singles with random op nodes
     for(auto& si : singles)
     {
         add(engine, rootNode, std::move(si->clone()));
     }
 
+    // because I'm lazy...
+    // TODO
+    // trim(rootNode, maxDepth);
     
-    return Function(std::move(rootNode));
+    return rootNode;
 }
 
 bool recursive_append(RandomEngine& engine, NodePtr& root, NodePtr&& nodeToInsert)

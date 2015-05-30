@@ -8,70 +8,53 @@ class Function
 {
 public:
 
-    Function() :
-        m_variableName("x")
+    Function(VariableName variableName = "x") :
+        m_variableName{std::move(variableName)}
     {
     }
 
-    Function(NodePtr node, const std::string& variableName = "x") :
-        m_variableName(variableName)
+    Function(NodePtr node, VariableName variableName = "x") :
+        Function{std::move(variableName)}
     {
         *this = std::move(node);
     }
-
-    Function(const std::string& source, const std::string& variableName = "x") :
-        m_variableName(variableName)
-    {
-        *this = source;
-    }
     
-    Function(const Function&) = default;
-    Function& operator=(const Function&) = default;
-    Function(Function&&) = default;
-    Function& operator=(Function&&) = default;
-
-    int operator()(int variable) 
+    Function(const Function& fn) : 
+        m_variableName{fn.m_variableName},
+        m_node{fn.m_node != nullptr ? fn.m_node->clone().release() : nullptr}
     {
-        getVariableMap()[m_variableName] = variable;
-        return getNode()->eval(&getVariableMap());
     }
 
-    Function& operator=(const std::string& str)
+    Function& operator=(const Function& fn)
     {
-        parse(str);
+        m_node.reset(fn.m_node != nullptr ? fn.m_node->clone().release() : nullptr);
+        m_variableName = fn.m_variableName;
         return *this;
     }
 
-    Function& operator=(NodePtr node)
+    Function(Function&&) noexcept = default;
+    Function& operator=(Function&&) noexcept = default;
+
+    Value operator()(VariableMap& map, Value varValue) const
     {
-        m_parserResult.statement = std::move(node);
-        return *this;
+        map[m_variableName] = varValue;
+        return getNode()->eval(&map);
     }
 
-    VariableMap& getVariableMap()
-    {
-        return m_parserResult.vars;
-    }
+    NodePtr& getNode() { return m_node; }
+    const NodePtr& getNode() const { return m_node; }
 
-    const NodePtr& getNode() const
-    {
-        return m_parserResult.statement;
-    }
-
-    NodePtr& getNode() 
-    {
-        return m_parserResult.statement;
+    Function& operator=(NodePtr node) 
+    { 
+        ASSERT(node != nullptr, "node is null"); 
+        m_node = std::move(node); 
+        return *this; 
     }
 
 private:
 
-    void parse(std::string text)
-    {
-        m_parserResult = ::parse(text);
-    }
-
-    std::string m_variableName;
-    ParseResult m_parserResult;
+    VariableName m_variableName;
+    NodePtr m_node;
 };
 
 std::ostream& operator<<(std::ostream&, const Function&);

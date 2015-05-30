@@ -3,8 +3,9 @@
 
 #include <functional>
 
-#include "Function.hpp"
-#include "random_utils.hpp"
+#include "RandomUtils.hpp"
+
+#include "lang/Node.hpp"
 
 /*
  * There are three major genetic operations that
@@ -24,8 +25,9 @@
  * Source: http://pages.ucsd.edu/~aerobins/genetic/div3.pdf
  */
 
-Function& mutate(RandomEngine& engine, Function& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize);
+void mutate(RandomEngine& engine, NodePtr& fn, std::uniform_int_distribution<> constantDist, double chanceToChangeVar, double chanceToChangeConstant, bool useNearestNeighbour, int stepSize);
+
 // TODO: maxDepth to do something..
-Function mate(RandomEngine& engine, const Function& p1, const Function& p2, std::function<NodePtr()> nodeCreator, int maxDepth);
+NodePtr mate(RandomEngine& engine, const NodePtr& p1, const NodePtr& p2, std::function<NodePtr()> nodeCreator, int maxDepth);
 
 #endif // GENETICOPERATIONS_HPP

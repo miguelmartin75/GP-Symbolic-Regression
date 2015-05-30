@@ -5,6 +5,9 @@
 #include "Function.hpp"
 #include "GeneticOperations.hpp"
 
+// TODO: support multiple variables
+constexpr const char* VARIABLE_NAME = "x";
+
 SymbolicRegressionSolver::SymbolicRegressionSolver() :
     m_randomEngine{m_randomDevice()}
 {
@@ -26,17 +29,11 @@ void SymbolicRegressionSolver::reset()
     m_foundSolution = false;
 
     populate();
+    checkForSolution();
 }
 
-void SymbolicRegressionSolver::step()
+bool SymbolicRegressionSolver::checkForSolution()
 {
-    assert(m_solutions.size() != 0 && "solution size is 0");
-
-    /*
-       std::cout << "Best solution for generation " << m_currentGeneration << " is: ";
-       std::cout << m_solutions[0].function;
-       std::cout << " [fitness = " << m_solutions[0].fitnessLevel << "]\n";
-       */
     if(m_solutions[0].fitnessLevel <= m_config.solutionCriterea)
     {
         m_solutions.erase(std::remove_if(m_solutions.begin(),
@@ -46,17 +43,25 @@ void SymbolicRegressionSolver::step()
                         return sol.fitnessLevel > m_config.solutionCriterea;
                     }), m_solutions.end());
         m_foundSolution = true;
-        return;
     }
+    
+    return foundSolution();
+}
+
+void SymbolicRegressionSolver::step()
+{
+    assert(m_solutions.size() != 0 && "solution size is 0");
+
+    if(foundSolution())
+        return;
 
     m_isReset = false;
     m_currentGeneration++;
 
-    //std::cout << "Previous solution size: " << m_solutions.size() << '\n';
     m_solutions = performGeneticOperations();
-    //std::cout << "New solution size: " << m_solutions.size() << '\n';
 
     sort();
+    checkForSolution();
 }
 
 void SymbolicRegressionSolver::sort()
@@ -90,7 +95,8 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
     SolutionList newSolutions;
     newSolutions.reserve(m_solutions.size());
 
-    std::vector<Function*> matingList;
+    NodePtr* matingList[2] = { nullptr, nullptr };
+
     RandomEngine engine(m_randomDevice());
     std::uniform_real_distribution<> dist(0, 1);
 
@@ -114,8 +120,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
-            matingList.emplace_back(&solution.function);
-            if(matingList.size() == 2)
+            if(matingList[0] && matingList[1])
             {
                 Solution sol = createSolution(mate(m_randomEngine, *matingList[0], *matingList[1], [&]()
                             {
@@ -127,7 +132,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                                 }
                                 else
                                 {
-                                    node = ::node<VariableNode>("x");
+                                    node = ::node<VariableNode>(VARIABLE_NAME);
                                 }
                                 return node;
                             }, m_config.maxSolutionDepth));
@@ -137,7 +142,16 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 #ifdef VERBOSE_LOG
                 std::cout << "mating " << solution.function;
 #endif 
-                matingList.clear();
+                matingList[0] = matingList[1] = nullptr;
+            }
+            else
+            {
+                for(int i = 0; i < 2; ++i)
+                {
+                    if(!matingList[i]) continue;
+
+                    matingList[i] = &solution.function.getNode();
+                }
             }
         }
         else
@@ -180,7 +194,8 @@ void SymbolicRegressionSolver::performMutation(Solution& solution)
         useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
     }
 
-    mutate(m_randomEngine, solution.function, m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
+    mutate(m_randomEngine, solution.function.getNode(), m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
+
     solution.fitnessLevel = fitness(solution.function);
     solution.mutated = true;
 
@@ -207,17 +222,17 @@ void SymbolicRegressionSolver::updateFitnesses()
     }
 }
 
-size_t SymbolicRegressionSolver::fitness(Function& fn) const
+size_t SymbolicRegressionSolver::fitness(const Function& fn)
 {
     size_t result = 0;
     for(auto& p : m_points)
     {
-        result += abs(p.y - fn(p.x));
+        result += abs(p.y - fn(m_variableMap, p.x));
     }
     return result;
 }
 
-Solution SymbolicRegressionSolver::createSolution(Function fn) const
+Solution SymbolicRegressionSolver::createSolution(Function fn)
 {
     auto fit = fitness(fn);
     return Solution{std::move(fn), fit};
@@ -236,7 +251,7 @@ NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<
     switch(typeToGenerate)
     {
         case Node::Type::VARIABLE:
-            return node<VariableNode>("x");
+            return node<VariableNode>(VARIABLE_NAME);
         case Node::Type::VALUE:
             return node<ValueNode>(constantDist(engine));
         case Node::Type::OPERATION:
