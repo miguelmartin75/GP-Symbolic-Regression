@@ -61,7 +61,7 @@ endif()
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 # Make sure we're compiling with C++14 (C++1y)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Check if were compiling with clang, if we are, we need
 # to add "-stdlib=libc++" to the command line in order for it to compile
@@ -72,3 +72,7 @@ endif()
 
 # Add the library
 add_library(${PROJECT_NAME} ${SOURCES})
+
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES OSX_ARCHITECTURES "x86_64;")
+endif()
