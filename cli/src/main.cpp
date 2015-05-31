@@ -133,6 +133,7 @@ void parseArguments(int argc, char *argv[])
                         functionAsString += argv[j];
                     }
                     fn = functionAsString;
+                    fn = parse(functionAsString).statement;
                 }
                 break;
             case 'i':
