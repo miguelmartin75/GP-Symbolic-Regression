@@ -50,7 +50,7 @@ struct ValueNode : public Node
         return Type::VALUE;
     }
 
-    virtual Value eval(const VariableMap* map) const override
+    virtual Value eval(const VariableMap*) const override
     {
         return value;
     }
@@ -113,7 +113,12 @@ struct OperatorNode : public Node
         return ::eval(left->eval(map), right->eval(map), op); 
     }
     
-    virtual NodePtr clone() const override { return node<OperatorNode>(op, left == nullptr ? nullptr : std::move(left->clone()), right == nullptr ? nullptr : std::move(right->clone())); }
+    virtual NodePtr clone() const override 
+    { 
+        return node<OperatorNode>(op, 
+                left.get() == nullptr ? nullptr : std::move(left->clone()), 
+                right.get() == nullptr ? nullptr : std::move(right->clone()));
+    }
 };
 
 #endif // NODE_HPP
