@@ -28,6 +28,7 @@ public:
         float matePercent = 0.45f;
 
         // max/min random co-efficients
+        bool generateConstantNodes = false;
         std::uniform_int_distribution<> constantDist{0, 100};
         
         size_t solutionCriterea = 0; /* 0 means fully successful */
@@ -90,6 +91,8 @@ private:
     size_t fitness(const Function& fn);
     Solution createSolution(Function fn);
     bool checkForSolution();
+
+    NodePtr generate(int depth);
 
     std::random_device m_randomDevice;
     RandomEngine m_randomEngine;

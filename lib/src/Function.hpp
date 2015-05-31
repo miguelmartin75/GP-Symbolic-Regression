@@ -8,12 +8,12 @@ class Function
 {
 public:
 
-    Function(VariableName variableName = "x") :
+    explicit Function(VariableName variableName = "x") :
         m_variableName{std::move(variableName)}
     {
     }
 
-    Function(NodePtr node, VariableName variableName = "x") :
+    explicit Function(NodePtr node, VariableName variableName = "x") :
         Function{std::move(variableName)}
     {
         *this = std::move(node);

@@ -14,9 +14,9 @@ SymbolicRegressionSolver::SymbolicRegressionSolver() :
 }
 
 SymbolicRegressionSolver::SymbolicRegressionSolver(const Config& config, const PointList& points) :
+    m_randomEngine{m_randomDevice()},
     m_config(config),
-    m_points(points),
-    m_randomEngine{m_randomDevice()}
+    m_points(points)
 {
 }
 
@@ -122,7 +122,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             if(matingList[0] && matingList[1])
             {
-                Solution sol = createSolution(mate(m_randomEngine, *matingList[0], *matingList[1], [&]()
+                Solution sol = createSolution(Function{mate(m_randomEngine, *matingList[0], *matingList[1], [&]()
                             {
                                 NodePtr node;
                                 std::uniform_int_distribution<> dist(0, 2);
@@ -135,7 +135,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                                     node = ::node<VariableNode>(VARIABLE_NAME);
                                 }
                                 return node;
-                            }, m_config.maxSolutionDepth));
+                            }, m_config.maxSolutionDepth)});
                 sol.mated = true;
                 newSolutions.emplace_back(sol);
 
@@ -238,27 +238,30 @@ Solution SymbolicRegressionSolver::createSolution(Function fn)
     return Solution{std::move(fn), fit};
 }
 
-NodePtr generate(RandomEngine& engine, int depth, std::uniform_int_distribution<>& constantDist)
+NodePtr SymbolicRegressionSolver::generate(int depth)
 {
     static std::uniform_int_distribution<> binaryDist(0, 1);
     static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
     Node::Type typeToGenerate = Node::Type::OPERATION;
     if(depth == 0)
     {
-        typeToGenerate = binaryDist(engine) == 0 ? Node::Type::VALUE : Node::Type::VARIABLE;
+        typeToGenerate = binaryDist(m_randomEngine) == 0 ? Node::Type::VALUE : Node::Type::VARIABLE;
     }
 
     switch(typeToGenerate)
     {
+        case Node::Type::VALUE:
+            if(m_config.generateConstantNodes)
+            {
+                return node<ValueNode>(m_config.constantDist(m_randomEngine));
+            } // else fall through
         case Node::Type::VARIABLE:
             return node<VariableNode>(VARIABLE_NAME);
-        case Node::Type::VALUE:
-            return node<ValueNode>(constantDist(engine));
         case Node::Type::OPERATION:
             {
-                return node<OperatorNode>(static_cast<Operator>(operatorDist(engine)),
-                        std::move(generate(engine, depth - 1, constantDist)),
-                        std::move(generate(engine, depth - 1, constantDist)));
+                return node<OperatorNode>(static_cast<Operator>(operatorDist(m_randomEngine)),
+                        std::move(generate(depth - 1)),
+                        std::move(generate(depth - 1)));
             }
         default:
             ASSERT(true, "invalid type generated in generate");
@@ -273,5 +276,5 @@ Solution SymbolicRegressionSolver::randomlyGenerateSolution()
     std::uniform_int_distribution<> dist(1, m_config.initialMaxDepth);
     const int depthToGenerate = dist(m_randomEngine);
 
-    return createSolution(std::move(Function{generate(m_randomEngine, depthToGenerate, m_config.constantDist)}));
+    return createSolution(std::move(Function{generate(depthToGenerate)}));
 }
