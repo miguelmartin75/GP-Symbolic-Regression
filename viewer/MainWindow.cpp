@@ -124,7 +124,7 @@ void MainWindow::run()
     if(!m_solver.isRunning())
     {
         qDebug() << "Attempting to run";
-        RunThread* thread = new RunThread(m_sleepAmount, m_solver);
+        RunThread* thread = new RunThread(m_sleepAmount, m_solver, m_solverMutex);
         QObject::connect(thread, SIGNAL(stepOccured()), this, SLOT(on_runnerThread_stepOccured()));
         QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
         QObject::connect(thread, SIGNAL(stoppedRunning()), this, SLOT(on_runnerThread_stoppedRunnnig()));
@@ -150,6 +150,8 @@ void MainWindow::updateInterface()
 {
     qDebug() << "Updating the interface";
     ui.solutionsList->clear();
+
+    QMutexLocker locker{&m_solverMutex};
     for(auto& solution : m_solver.currentSolutionSet())
     {
         try
@@ -166,6 +168,12 @@ void MainWindow::updateInterface()
     }
 
     ui.currentGenerationLabel->setText("Current Generation: " + QString::number(m_solver.currentGeneration()));
+
+    ui.solutionsList->setItemSelected(ui.solutionsList->item(0), true);
+    if(ui.autoRefreshDisplayCheckBox->isChecked())
+    {
+        updateGraph(CURRENT_PLOT, 0);
+    }
 }
 
 void MainWindow::on_stepButton_clicked()

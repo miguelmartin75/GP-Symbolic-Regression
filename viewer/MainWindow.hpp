@@ -67,6 +67,7 @@ private:
     VariableMap m_variableMap;
 
     long long m_sleepAmount = 0;
+    QMutex m_solverMutex;
 };
 
 #endif // MAINWINDOW_HPP

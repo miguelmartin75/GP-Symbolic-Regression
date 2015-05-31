@@ -12,9 +12,10 @@ class RunThread : public QThread
 
 public:
 
-    RunThread(const long long& sleepAmount, SymbolicRegressionSolver& solver) :
+    RunThread(const long long& sleepAmount, SymbolicRegressionSolver& solver, QMutex& solverMutex) :
                m_sleepAmount(sleepAmount),
-               m_solver(solver)
+               m_solver(solver),
+               m_solverMutex(solverMutex)
     {}
 
 signals:
@@ -26,6 +27,7 @@ private:
 
     const long long& m_sleepAmount;
     SymbolicRegressionSolver& m_solver;
+    QMutex& m_solverMutex;
 
     void run() override;
 };

@@ -2,6 +2,7 @@
 
 void RunThread::run()
 {
+
     qDebug() << "Running...";
     m_solver.setIsRunning(true);
     while(m_solver.isRunning() &&
@@ -9,8 +10,11 @@ void RunThread::run()
           m_solver.currentSolutionSet().size() != 0 &&
           !m_solver.foundSolution())
     {
+        m_solverMutex.lock();
         qDebug() << "Stepping...\n";
         m_solver.step();
+
+        m_solverMutex.unlock();
 
         emit stepOccured();
 

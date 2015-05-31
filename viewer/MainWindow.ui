@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>973</width>
+    <width>875</width>
     <height>674</height>
    </rect>
   </property>
@@ -126,6 +126,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="autoRefreshDisplayCheckBox">
+         <property name="text">
+          <string>Automatically Refresh Display</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="sleepLabel">
          <property name="text">
           <string>Sleep Amount: 0 ms</string>
@@ -142,7 +149,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>973</width>
+     <width>875</width>
      <height>22</height>
     </rect>
    </property>
@@ -169,8 +176,8 @@
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
    <addaction name="menuSimulate"/>
+   <addaction name="menuEdit"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">

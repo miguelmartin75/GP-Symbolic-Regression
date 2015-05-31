@@ -8,7 +8,6 @@ QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
-QMAKE_CXX=/usr/local/bin/clang++
 
 TARGET = viewer
 TEMPLATE = app
