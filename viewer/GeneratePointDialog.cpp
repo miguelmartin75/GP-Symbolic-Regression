@@ -61,7 +61,7 @@ void GeneratePointDialog::on_addPointsButton_clicked()
 
 void GeneratePointDialog::on_eraseAndAddButton_clicked()
 {
-    Function function{ui.functionLineEdit->text().toStdString()};
+    Function function{parse(ui.functionLineEdit->text().toStdString()).statement};
     updateVars();
 
     m_points.clear();
