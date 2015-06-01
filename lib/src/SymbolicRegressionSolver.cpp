@@ -126,7 +126,7 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
                             {
                                 NodePtr node;
                                 std::uniform_int_distribution<> dist(0, 2);
-                                if(dist(engine) <= 1)
+                                if(dist(engine) <= 1 && m_config.generateConstantNodes)
                                 {
                                     node = ::node<ValueNode>(m_config.constantDist(engine));
                                 }

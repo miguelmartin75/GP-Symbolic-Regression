@@ -44,7 +44,7 @@ public:
         } nearestNeighbourOption = NearestNeighbourOption::RANDOM;
 
         double chanceToUseNearestNeighbour = 0.7;
-        int stepSize = 1; /* step for nearest neightbour */
+        int stepSize = 1; /* step for nearest neighbour */
 
         enum class PopulationRefillOption
         {
