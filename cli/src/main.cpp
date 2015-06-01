@@ -18,7 +18,7 @@ SymbolicRegressionSolver::Config config{};
 Function fn{parse("+ 1 x").statement, "x"};
 int initialPoint = -10;
 int endPoint = 10;
-int stepSize = 2;
+int stepSize = 1;
 
 std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config);
 std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config& config);
@@ -79,18 +79,17 @@ void performSimulation(const PointList& points)
     {
         auto& solution = solutions[i];
         std::cout << solver.currentGeneration() << ",";
-//        std::cout << i + 1 << ",";
         std::cout << solution.fitnessLevel << ",";
         std::cout << solution.mutated << ","; 
         std::cout << solution.mated << '\n';
 
-#ifdef VERBOSE_LOG
+//#ifdef VERBOSE_LOG
            std::cout << "solution " << i + 1 << ":\n";
            std::cout << "\tfunction: " << solution.function << '\n';
            std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
            std::cout << "\tmutated?: " << std::boolalpha << solution.mutated << '\n';
            std::cout << "\tmated?: " << solution.mated << '\n';
-#endif //VERBOSE_LOG
+//#endif //VERBOSE_LOG
     }
 }
 
@@ -132,7 +131,6 @@ void parseArguments(int argc, char *argv[])
                     {
                         functionAsString += argv[j];
                     }
-                    fn = functionAsString;
                     fn = parse(functionAsString).statement;
                 }
                 break;
@@ -213,38 +211,6 @@ void read(std::string& buffer, std::istream& is, T& value)
 }
 }
 
-std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config::NearestNeighbourOption& n)
-{
-    static constexpr const char* STRINGS[] = { "Always Use", "Never Use", "Random" };
-    return os << STRINGS[static_cast<size_t>(n)];
-}
-
-std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config::PopulationRefillOption& p)
-{
-    static constexpr const char* STRINGS[] = { "Refill", "Duplicate", "Throw Away" };
-    return os << STRINGS[static_cast<size_t>(p)];
-}
-
-std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config& config)
-{
-    os << "initial population = " << config.initialPopulation << '\n';
-    os << "max generations    = " << config.maxGenerations << '\n';
-    os << "initial max depth  = " << config.initialMaxDepth << '\n';
-    os << "max solution depth = " << config.maxSolutionDepth << '\n';
-    os << "keep percent       = " << config.keepPercentage << '\n';
-    os << "mutation percent   = " << config.mutationPercent << '\n';
-    os << "mate percent       = " << config.matePercent << '\n';
-    os << "min constant       = " << config.constantDist.a() << '\n';
-    os << "max constant       = " << config.constantDist.b() << '\n';
-    os << "solution criteria  = " << config.solutionCriterea << '\n';
-    os << "chance to change const = " << config.chanceToChangeConstant << '\n';
-    os << "chance to change var = "  << config.chanceToChangeVar << '\n';
-    os << "nearest neighbour opt = " << config.nearestNeighbourOption << '\n';
-    os << "chance to use nearest neighbour = " << config.chanceToUseNearestNeighbour << '\n';
-    os << "step size = " << config.stepSize << '\n';
-    os << "pop refill opt = " << config.populationRefillOption << '\n';
-    return os;
-}
 
 std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config)
 {
