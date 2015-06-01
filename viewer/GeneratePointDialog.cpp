@@ -1,6 +1,8 @@
 #include "GeneratePointDialog.hpp"
 
 #include "ErrorDialog.hpp"
+#include "Config.hpp"
+
 
 GeneratePointDialog::GeneratePointDialog(QWidget *parent, PointList& points) :
     QDialog(parent),
@@ -14,6 +16,7 @@ GeneratePointDialog::GeneratePointDialog(QWidget *parent, PointList& points) :
     ui.stepSizeLineEdit->setText("2");
 
     QValidator* v = new QIntValidator();
+
     ui.startLineEdit->setValidator(v);
     ui.endLineEdit->setValidator(v);
     ui.stepSizeLineEdit->setValidator(v);

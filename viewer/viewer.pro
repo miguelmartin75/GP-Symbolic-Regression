@@ -32,7 +32,8 @@ HEADERS  += MainWindow.hpp \
     ErrorDialog.hpp \
     RunThread.hpp \
     GeneratePointDialog.hpp \
-    ConfigDialog.hpp
+    ConfigDialog.hpp \
+    Validator.hpp
 
 FORMS    += MainWindow.ui \
     PointEditDialog.ui \
