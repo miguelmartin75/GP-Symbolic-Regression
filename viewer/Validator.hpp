@@ -1,0 +1,4 @@
+#ifndef VALIDATOR_HPP
+#define VALIDATOR_HPP
+
+#endif // VALIDATOR_HPP

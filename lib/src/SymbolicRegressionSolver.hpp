@@ -1,6 +1,7 @@
 #ifndef SYMBOLICREGRESSIONSOLVER_HPP
 #define SYMBOLICREGRESSIONSOLVER_HPP
 
+#include <ostream>
 #include <vector>
 #include "Config.hpp"
 #include "Types.hpp"
@@ -28,10 +29,10 @@ public:
         float matePercent = 0.45f;
 
         // max/min random co-efficients
-        bool generateConstantNodes = false;
+        bool generateConstantNodes = true;
         std::uniform_int_distribution<> constantDist{0, 100};
         
-        size_t solutionCriterea = 0; /* 0 means fully successful */
+        Value solutionCriterea = 0; /* 0 means fully successful */
 
         double chanceToChangeConstant = 0.3;
         double chanceToChangeVar = 0.4;
@@ -44,7 +45,7 @@ public:
         } nearestNeighbourOption = NearestNeighbourOption::RANDOM;
 
         double chanceToUseNearestNeighbour = 0.7;
-        int stepSize = 1; /* step for nearest neighbour */
+        Value stepSize = 1; /* step for nearest neighbour */
 
         enum class PopulationRefillOption
         {
@@ -109,5 +110,7 @@ private:
 
     VariableMap m_variableMap;
 };
+
+std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config& config);
 
 #endif // SYMBOLICREGRESSIONSOLVER_HPP
