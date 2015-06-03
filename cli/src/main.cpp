@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <cmath>
 
 #include <boost/lexical_cast.hpp>
 
@@ -11,7 +12,7 @@
 #include "SymbolicRegressionSolver.hpp"
 #include "Config.hpp"
 
-//#define VERBOSE_LOG
+#define OPTIMISE_CONFIG
 
 int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
@@ -34,8 +35,6 @@ void printValidFlags()
     std::cout << "-r <amount of times to redo simulation>\n";
 }
 
-void performSimulation(const PointList& points);
-
 int main(int argc, char *argv[])
 {
     parseArguments(argc, argv);
@@ -56,41 +55,103 @@ int main(int argc, char *argv[])
         points.emplace_back(i, fn(map, i));
     }
 
-    for(int i = 0; i < amountOfSimulationsToPerform; ++i)
+    SymbolicRegressionSolver solver{config, points};
+
+    enum Direction { HIGHER, LOWER } dir = LOWER;
+
+    auto& variableToModify = solver.config().mutationPercent;
+    auto bestConfigOption = variableToModify;
+    double bestAverage;
+    size_t bestTotalSolutions = 0;
+
     {
-        performSimulation(points);
+        auto solutions = solver.solve();
+        bestAverage = solver.currentGeneration();
+        bestTotalSolutions = solutions.size();
+        solver.reset();
     }
+
+    variableToModify /= 2;
+
+    while(std::abs(variableToModify - bestConfigOption) > 0.001)
+    {
+        /*
+        std::cout << "bestConfigOpt = " << bestConfigOption << '\n';
+        std::cout << "variable to modify = " << variableToModify << '\n';
+        */
+
+        double currentAverage = 0;
+        size_t totalSolutions = 0;
+
+        for(int i = 1; i < amountOfSimulationsToPerform; ++i)
+        {
+            auto solutions = solver.solve();
+            totalSolutions += solutions.size();
+
+            currentAverage += solver.currentGeneration();
+
+#ifndef OPTIMISE_CONFIG
+            for(auto& solution : solutions)
+            {
+                /*
+                result.averageGen += solver.currentGeneration();
+                result.minGen = result.minGen == -1 ? solver.currentGeneration() : std::min(result.minGen, solver.currentGeneration());
+                result.maxGen = result.maxGen == -1 ? solver.currentGeneration() : std::max(result.maxGen, solver.currentGeneration());
+                */
+
+                std::cout << solver.currentGeneration() << ",";
+                std::cout << solution.fitnessLevel << ",";
+                std::cout << solution.mutated << ","; 
+                std::cout << solution.mated << '\n';
+            }
+#endif // OPTIMISE_CONFIG
+
+            solver.reset();
+        }
+        
+        currentAverage /= totalSolutions;
+        /*
+        std::cout << "currentAverage= " << currentAverage << '\n';
+        std::cout << "bestAverage= " << bestAverage << '\n';
+        std::cout << "total solutions= " << totalSolutions << '\n';
+        std::cout << "best total solutions= " << bestTotalSolutions << '\n';
+        */
+        if((totalSolutions > bestTotalSolutions &&
+            std::abs(static_cast<int>(totalSolutions - bestTotalSolutions)) >= amountOfSimulationsToPerform / 10.0) ||
+            currentAverage <= bestAverage)
+        {
+            bestAverage = currentAverage;
+            bestTotalSolutions = totalSolutions;
+            bestConfigOption = variableToModify;
+            //dir = LOWER;
+            //std::cout << "[IMPORTANT]: beat previous best\n";
+        }
+        else
+        {
+            dir = static_cast<Direction>(!static_cast<bool>(dir));
+            //dir = HIGHER;
+        }
+        //std::cout << "\n\n";
+        
+        if(dir == HIGHER)
+        {
+            variableToModify = (bestConfigOption + variableToModify) / 2;
+        }
+        else
+        {
+            variableToModify /= 2;
+        }
+    }
+
+    variableToModify = bestConfigOption;
+
+    std::cout << "optimal var: " << bestConfigOption << '\n';
+    /*
+    std::cout << "optimal config is: \n";
+    std::cout << solver.config() << '\n';
+    */
 
     return 0;
-}
-
-void performSimulation(const PointList& points)
-{
-    SymbolicRegressionSolver solver(config, points);
-    auto solutions = solver.solve();
-
-    if(!solver.foundSolution())
-    {
-//        std::cout << "No solution!\n";
-        return;
-    }
-
-    for(size_t i = 0; i < solutions.size(); ++i)
-    {
-        auto& solution = solutions[i];
-        std::cout << solver.currentGeneration() << ",";
-        std::cout << solution.fitnessLevel << ",";
-        std::cout << solution.mutated << ","; 
-        std::cout << solution.mated << '\n';
-
-//#ifdef VERBOSE_LOG
-           std::cout << "solution " << i + 1 << ":\n";
-           std::cout << "\tfunction: " << solution.function << '\n';
-           std::cout << "\tfitness: " << solution.fitnessLevel << '\n';
-           std::cout << "\tmutated?: " << std::boolalpha << solution.mutated << '\n';
-           std::cout << "\tmated?: " << solution.mated << '\n';
-//#endif //VERBOSE_LOG
-    }
 }
 
 void parseArguments(int argc, char *argv[])
@@ -167,11 +228,6 @@ void parseArguments(int argc, char *argv[])
                         file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
                         file.open(filepath);
                         file >> config; // read the config
-
-                        /*
-                        std::cout << "Loaded config:\n";
-                        std::cout << config << std::endl;
-                        */
                     } 
                     catch(boost::bad_lexical_cast& e)
                     {
