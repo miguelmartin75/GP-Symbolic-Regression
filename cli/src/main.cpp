@@ -57,48 +57,26 @@ int main(int argc, char *argv[])
 
     SymbolicRegressionSolver solver{config, points};
 
-    enum Direction { HIGHER, LOWER } dir = LOWER;
-
     auto& variableToModify = solver.config().mutationPercent;
-    auto bestConfigOption = variableToModify;
-    double bestAverage;
-    size_t bestTotalSolutions = 0;
+    variableToModify = 0;
 
+#ifdef OPTIMISE_CONFIG
+    for(; variableToModify <= 1; variableToModify += 0.1)
     {
-        auto solutions = solver.solve();
-        bestAverage = solver.currentGeneration();
-        bestTotalSolutions = solutions.size();
-        solver.reset();
-    }
-
-    variableToModify /= 2;
-
-    while(std::abs(variableToModify - bestConfigOption) > 0.001)
-    {
-        /*
-        std::cout << "bestConfigOpt = " << bestConfigOption << '\n';
-        std::cout << "variable to modify = " << variableToModify << '\n';
-        */
-
         double currentAverage = 0;
         size_t totalSolutions = 0;
+#endif // OPTIMISE_CONFIG
 
         for(int i = 1; i < amountOfSimulationsToPerform; ++i)
         {
             auto solutions = solver.solve();
-            totalSolutions += solutions.size();
 
+            totalSolutions += solutions.size();
             currentAverage += solver.currentGeneration();
 
 #ifndef OPTIMISE_CONFIG
             for(auto& solution : solutions)
             {
-                /*
-                result.averageGen += solver.currentGeneration();
-                result.minGen = result.minGen == -1 ? solver.currentGeneration() : std::min(result.minGen, solver.currentGeneration());
-                result.maxGen = result.maxGen == -1 ? solver.currentGeneration() : std::max(result.maxGen, solver.currentGeneration());
-                */
-
                 std::cout << solver.currentGeneration() << ",";
                 std::cout << solution.fitnessLevel << ",";
                 std::cout << solution.mutated << ","; 
@@ -109,47 +87,11 @@ int main(int argc, char *argv[])
             solver.reset();
         }
         
+#ifdef OPTIMISE_CONFIG
         currentAverage /= totalSolutions;
-        /*
-        std::cout << "currentAverage= " << currentAverage << '\n';
-        std::cout << "bestAverage= " << bestAverage << '\n';
-        std::cout << "total solutions= " << totalSolutions << '\n';
-        std::cout << "best total solutions= " << bestTotalSolutions << '\n';
-        */
-        if((totalSolutions > bestTotalSolutions &&
-            std::abs(static_cast<int>(totalSolutions - bestTotalSolutions)) >= amountOfSimulationsToPerform / 10.0) ||
-            currentAverage <= bestAverage)
-        {
-            bestAverage = currentAverage;
-            bestTotalSolutions = totalSolutions;
-            bestConfigOption = variableToModify;
-            //dir = LOWER;
-            //std::cout << "[IMPORTANT]: beat previous best\n";
-        }
-        else
-        {
-            dir = static_cast<Direction>(!static_cast<bool>(dir));
-            //dir = HIGHER;
-        }
-        //std::cout << "\n\n";
-        
-        if(dir == HIGHER)
-        {
-            variableToModify = (bestConfigOption + variableToModify) / 2;
-        }
-        else
-        {
-            variableToModify /= 2;
-        }
+        std::cout << variableToModify << ", " << currentAverage << ", " << totalSolutions << '\n';
     }
-
-    variableToModify = bestConfigOption;
-
-    std::cout << "optimal var: " << bestConfigOption << '\n';
-    /*
-    std::cout << "optimal config is: \n";
-    std::cout << solver.config() << '\n';
-    */
+#endif // OPTIMISE_CONFIG
 
     return 0;
 }
