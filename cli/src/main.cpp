@@ -44,14 +44,14 @@ struct Result
     size_t totalSolutions;
 };
 
-constexpr const int AMOUNT_OF_THREADS = 8;
+constexpr const int AMOUNT_OF_THREADS = 4;
 std::vector<Result> solutions[AMOUNT_OF_THREADS];
 
 template <class T>
 void optimiseConfig(size_t id, const PointList& points, const T& start, const T& end, const T& step)
 {
     SymbolicRegressionSolver solver{config, points};
-    auto& variableToModify = solver.config().keepPercentage;
+    auto& variableToModify = solver.config().chanceToChangeVar;
 
 #ifdef OPTIMISE_CONFIG
     for(variableToModify = start; variableToModify <= end; variableToModify += step)
@@ -81,10 +81,9 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
         }
         
 #ifdef OPTIMISE_CONFIG
-	if(totalSolutions != 0)
-		currentAverage /= totalSolutions;
+		currentAverage /= amountOfSimulationsToPerform;
+
         solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions);
-        //std::cout << variableToModify << ", " << currentAverage << ", " << totalSolutions << '\n';
     }
 #endif // OPTIMISE_CONFIG
 }
@@ -112,22 +111,10 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
     for(int i = 0; i < AMOUNT_OF_THREADS; ++i)
     {
-        constexpr double STEP_SIZE = 0.005;
+        constexpr double STEP_SIZE = 0.01;
         double start = i * 1.0 / AMOUNT_OF_THREADS;
         double end = (i + 1) * 1.0 / AMOUNT_OF_THREADS;
-	if(i == 0)
-	{
-	   start += STEP_SIZE;
-	}
-	if(i == AMOUNT_OF_THREADS - 1)
-	{
-	   end -= STEP_SIZE;
-	}
-
-        /*
-        std::cout << "start=" << start << '\n';
-        std::cout << "end=" << end << '\n';
-        */
+  
         threads.emplace_back([=]() { optimiseConfig(i, points, start, end,  STEP_SIZE); } );
     }
 
