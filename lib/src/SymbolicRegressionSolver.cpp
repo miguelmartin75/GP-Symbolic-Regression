@@ -191,7 +191,7 @@ void SymbolicRegressionSolver::performMutation(Solution& solution)
     }
     else if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::RANDOM)
     {
-        useNearestNeighbour = std::uniform_real_distribution<>{0, m_config.chanceToUseNearestNeighbour}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
+        useNearestNeighbour = std::uniform_real_distribution<>{0, 1}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
     }
 
     mutate(m_randomEngine, solution.function.getNode(), m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
