@@ -32,8 +32,8 @@ public:
         return *this;
     }
 
-    Function(Function&&) noexcept = default;
-    Function& operator=(Function&&) noexcept = default;
+    Function(Function&&) = default;
+    Function& operator=(Function&&) = default;
 
     Value operator()(VariableMap& map, Value varValue) const
     {

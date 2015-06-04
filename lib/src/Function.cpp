@@ -1,6 +1,6 @@
 #include "Function.hpp"
 
-#include <boost/lexical_cast/bad_lexical_cast.hpp>
+#include <boost/lexical_cast.hpp>
 
 std::ostream& operator<<(std::ostream& os, const Function& fn)
 {
