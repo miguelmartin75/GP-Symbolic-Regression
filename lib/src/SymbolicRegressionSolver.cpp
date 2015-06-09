@@ -95,11 +95,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
     SolutionList newSolutions;
     newSolutions.reserve(m_solutions.size());
 
-    //NodePtr* matingList[2] = { nullptr, nullptr };
     std::vector<NodePtr*> matingList;
+    matingList.reserve(2);
 
     RandomEngine engine(m_randomDevice());
-    std::uniform_real_distribution<> dist(1, 0);
+    std::uniform_real_distribution<> dist{1, 0};
 
     auto endIt = m_solutions.begin() + (size_t)(m_solutions.size() * m_config.keepPercentage);
 
@@ -141,20 +141,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 #ifdef VERBOSE_LOG
                 std::cout << "mating " << solution.function;
 #endif 
-                //matingList[0] = matingList[1] = nullptr;
                 matingList.clear();
             }
             else
             {
                 matingList.emplace_back(&solution.function.getNode());
-                /*
-                for(int i = 0; i < 2; ++i)
-                {
-                    if(!matingList[i]) continue;
-
-                    matingList[i] = &solution.function.getNode();
-                }
-                */
             }
         }
         else

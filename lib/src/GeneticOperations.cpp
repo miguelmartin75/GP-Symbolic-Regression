@@ -52,8 +52,7 @@ void mutate(RandomEngine& engine, NodePtr& fn, std::uniform_int_distribution<> c
     static std::uniform_int_distribution<> operatorDist(0, (int)Operator::COUNT - 1);
 
     auto nodesToChange = randomNodes(engine, fn);
-    std::uniform_int_distribution<> changeVarDist(0, 1);
-    std::uniform_int_distribution<> changeConstantDist(0, 1);
+    std::uniform_real_distribution<> realDist{1, 0};
 
     ASSERT(fn != nullptr, "function is null");
     
@@ -76,7 +75,7 @@ void mutate(RandomEngine& engine, NodePtr& fn, std::uniform_int_distribution<> c
                         break;
                     case Node::Type::VALUE:
                         {
-                            if(changeConstantDist(engine) <= chanceToChangeConstant)
+                            if(realDist(engine) <= chanceToChangeConstant)
                             {
                                 node = ::node<VariableNode>("x");
                             }
@@ -102,7 +101,7 @@ void mutate(RandomEngine& engine, NodePtr& fn, std::uniform_int_distribution<> c
                         // actually delete the reference. So in that sense,
                         // we should be using unique_ptr's for the nodes. Since
                         // I know that no one else is going to be holding the Node.
-                        if(changeVarDist(engine) <= chanceToChangeVar)
+                        if(realDist(engine) <= chanceToChangeVar)
                         {
                             node = ::node<ValueNode>(constantDist(engine));
                         }
