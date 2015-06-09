@@ -51,7 +51,7 @@ template <class T>
 void optimiseConfig(size_t id, const PointList& points, const T& start, const T& end, const T& step)
 {
     SymbolicRegressionSolver solver{config, points};
-    auto& variableToModify = solver.config().chanceToChangeVar;
+    auto& variableToModify = solver.config().keepPercentage;
 
 #ifdef OPTIMISE_CONFIG
     for(variableToModify = start; variableToModify <= end; variableToModify += step)
@@ -60,12 +60,9 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
         size_t totalSolutions = 0;
 #endif // OPTIMISE_CONFIG
 
-        for(int i = 1; i < amountOfSimulationsToPerform; ++i)
+        for(int i = 0; i < amountOfSimulationsToPerform; ++i)
         {
             auto solutions = solver.solve();
-
-            totalSolutions += solutions.size();
-            currentAverage += solver.currentGeneration();
 
 #ifndef OPTIMISE_CONFIG
             for(auto& solution : solutions)
@@ -75,6 +72,9 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
                 std::cout << solution.mutated << ","; 
                 std::cout << solution.mated << '\n';
             }
+#else
+            totalSolutions += solutions.size();
+            currentAverage += solver.currentGeneration();
 #endif // OPTIMISE_CONFIG
 
             solver.reset();

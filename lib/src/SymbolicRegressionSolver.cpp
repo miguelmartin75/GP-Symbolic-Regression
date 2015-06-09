@@ -95,10 +95,11 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
     SolutionList newSolutions;
     newSolutions.reserve(m_solutions.size());
 
-    NodePtr* matingList[2] = { nullptr, nullptr };
+    //NodePtr* matingList[2] = { nullptr, nullptr };
+    std::vector<NodePtr*> matingList;
 
     RandomEngine engine(m_randomDevice());
-    std::uniform_real_distribution<> dist(0, 1);
+    std::uniform_real_distribution<> dist(1, 0);
 
     auto endIt = m_solutions.begin() + (size_t)(m_solutions.size() * m_config.keepPercentage);
 
@@ -113,14 +114,12 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
         {
             performMutation(solution);
             newSolutions.emplace_back(solution);
+            if(m_config.initialPopulation == 1)
+                continue;
         }
-
-        if(m_config.initialPopulation == 1)
-            continue;
-
         else if(randomNumber <= m_config.mutationPercent + m_config.matePercent)
         {
-            if(matingList[0] && matingList[1])
+            if(matingList.size() == 2)
             {
                 Solution sol = createSolution(Function{mate(m_randomEngine, *matingList[0], *matingList[1], [&]()
                             {
@@ -142,16 +141,20 @@ SolutionList SymbolicRegressionSolver::performGeneticOperations()
 #ifdef VERBOSE_LOG
                 std::cout << "mating " << solution.function;
 #endif 
-                matingList[0] = matingList[1] = nullptr;
+                //matingList[0] = matingList[1] = nullptr;
+                matingList.clear();
             }
             else
             {
+                matingList.emplace_back(&solution.function.getNode());
+                /*
                 for(int i = 0; i < 2; ++i)
                 {
                     if(!matingList[i]) continue;
 
                     matingList[i] = &solution.function.getNode();
                 }
+                */
             }
         }
         else
@@ -191,7 +194,7 @@ void SymbolicRegressionSolver::performMutation(Solution& solution)
     }
     else if(m_config.nearestNeighbourOption == Config::NearestNeighbourOption::RANDOM)
     {
-        useNearestNeighbour = std::uniform_real_distribution<>{0, 1}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
+        useNearestNeighbour = std::uniform_real_distribution<>{1, 0}(m_randomEngine) <= m_config.chanceToUseNearestNeighbour;
     }
 
     mutate(m_randomEngine, solution.function.getNode(), m_config.constantDist, m_config.chanceToChangeVar, m_config.chanceToChangeConstant, useNearestNeighbour, m_config.stepSize);
