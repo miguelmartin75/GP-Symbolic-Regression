@@ -36,10 +36,14 @@ void printValidFlags()
     std::cout << "-r <amount of times to redo simulation>\n";
 }
 
+#define MUTATE_MATE
+
 struct Result
 {
     Result(double var, double average, size_t totalSolutions) : var(var), average(average), totalSolutions(totalSolutions) { }
+    Result(double var, double var2, double average, size_t totalSolutions) : var(var), var2(var2), average(average), totalSolutions(totalSolutions) { }
     double var;
+    double var2;
     double average;
     size_t totalSolutions;
 };
@@ -47,14 +51,27 @@ struct Result
 constexpr const int AMOUNT_OF_THREADS = 4;
 std::vector<Result> solutions[AMOUNT_OF_THREADS];
 
+
 template <class T>
 void optimiseConfig(size_t id, const PointList& points, const T& start, const T& end, const T& step)
 {
     SymbolicRegressionSolver solver{config, points};
+#ifndef MUTATE_MATE
     auto& variableToModify = solver.config().keepPercentage;
+#else
+    auto& variableToModify = solver.config().matePercent;
+#endif
 
 #ifdef OPTIMISE_CONFIG
+#ifdef MUTATE_MATE
+    auto& var2 = solver.config().mutationPercent;
+    for(var2 = start; var2 <= end; var2 += step)
+#endif
+#ifndef MUTATE_MATE
     for(variableToModify = start; variableToModify <= end; variableToModify += step)
+#else
+    for(variableToModify = 0; variableToModify <= 1; variableToModify += step)
+#endif
     {
         double currentAverage = 0;
         size_t totalSolutions = 0;
@@ -83,10 +100,15 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 #ifdef OPTIMISE_CONFIG
 		currentAverage /= amountOfSimulationsToPerform;
 
+#ifndef MUTATE_MATE
         solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions);
+#else
+        solutions[id].emplace_back(var2, variableToModify, currentAverage, totalSolutions);
+#endif 
     }
 #endif // OPTIMISE_CONFIG
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -111,7 +133,7 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
     for(int i = 0; i < AMOUNT_OF_THREADS; ++i)
     {
-        constexpr double STEP_SIZE = 0.01;
+        constexpr double STEP_SIZE = 0.05;
         double start = i * 1.0 / AMOUNT_OF_THREADS;
         double end = (i + 1) * 1.0 / AMOUNT_OF_THREADS;
   
@@ -133,7 +155,11 @@ int main(int argc, char *argv[])
 
     for(auto& sol : sols)
     {
+#ifndef MUTATE_MATE
         std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << '\n';
+#else
+        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << '\n';
+#endif // MUTATE_MATE
     }
 
     return 0;
