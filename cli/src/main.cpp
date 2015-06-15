@@ -36,16 +36,17 @@ void printValidFlags()
     std::cout << "-r <amount of times to redo simulation>\n";
 }
 
-#define MUTATE_MATE
+//#define MUTATE_MATE
 
 struct Result
 {
-    Result(double var, double average, size_t totalSolutions) : var(var), average(average), totalSolutions(totalSolutions) { }
-    Result(double var, double var2, double average, size_t totalSolutions) : var(var), var2(var2), average(average), totalSolutions(totalSolutions) { }
+    Result(double var, double average, size_t totalSolutions, double stdDev) : var(var), average(average), totalSolutions(totalSolutions), stdDev(stdDev) { }
+    Result(double var, double var2, double average, size_t totalSolutions, double stdDev) : var(var), var2(var2), average(average), totalSolutions(totalSolutions), stdDev(stdDev) { }
     double var;
     double var2;
     double average;
     size_t totalSolutions;
+    double stdDev;
 };
 
 constexpr const int AMOUNT_OF_THREADS = 4;
@@ -61,6 +62,8 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 #else
     auto& variableToModify = solver.config().matePercent;
 #endif
+
+    std::vector<size_t> temp;
 
 #ifdef OPTIMISE_CONFIG
 #ifdef MUTATE_MATE
@@ -92,18 +95,36 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 #else
             totalSolutions += solutions.size();
             currentAverage += solver.currentGeneration();
+            temp.emplace_back(solver.currentGeneration());
 #endif // OPTIMISE_CONFIG
+            /*
+
+#ifndef MUTATE_MATE
+            ::solutions[id].emplace_back(variableToModify, solver.currentGeneration(), solutions.size());
+#else
+            ::solutions[id].emplace_back(var2, variableToModify, solver.currentGeneration(), solutions.size());
+#endif 
+*/
 
             solver.reset();
         }
         
 #ifdef OPTIMISE_CONFIG
-		currentAverage /= amountOfSimulationsToPerform;
+        if(totalSolutions != 0)
+            currentAverage /= totalSolutions;
+
+        double stdDev = 0;
+        for(auto& i : temp)
+        {
+            auto diff = i - currentAverage;
+            stdDev += diff * diff;
+        }
+        stdDev /= amountOfSimulationsToPerform;
 
 #ifndef MUTATE_MATE
-        solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions);
+        solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions, stdDev);
 #else
-        solutions[id].emplace_back(var2, variableToModify, currentAverage, totalSolutions);
+        solutions[id].emplace_back(var2, variableToModify, currentAverage, totalSolutions, stdDev);
 #endif 
     }
 #endif // OPTIMISE_CONFIG
@@ -133,7 +154,7 @@ int main(int argc, char *argv[])
     std::vector<std::thread> threads;
     for(int i = 0; i < AMOUNT_OF_THREADS; ++i)
     {
-        constexpr double STEP_SIZE = 0.05;
+        constexpr double STEP_SIZE = 0.005;
         double start = i * 1.0 / AMOUNT_OF_THREADS;
         double end = (i + 1) * 1.0 / AMOUNT_OF_THREADS;
   
@@ -156,9 +177,9 @@ int main(int argc, char *argv[])
     for(auto& sol : sols)
     {
 #ifndef MUTATE_MATE
-        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << '\n';
+        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << ", " << sol.stdDev << ", " << (sol.stdDev / std::sqrt(sol.totalSolutions)) << '\n';
 #else
-        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << '\n';
+        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << ", ", sol.stdDev << ", " << (sol.stdDev / std::sqrt(sol.totalSolutions)) << '\n';
 #endif // MUTATE_MATE
     }
 
@@ -292,6 +313,7 @@ std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& con
     read(buffer, is, config.mutationPercent);
     read(buffer, is, config.matePercent);
 
+    read(buffer, is, config.generateConstantNodes);
 
     // have to do this separately for const dist
     int a, b;

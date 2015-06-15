@@ -5,6 +5,7 @@ max solution depth = 20
 keep percent       = 0.1
 mutation percent   = 0.45
 mate percent       = 0.45
+generate const node = 0
 min constant       = 0
 max constant       = 100
 solution criteria  = 0
