@@ -1,11 +1,11 @@
-initial population = 100
+initial population = 10
 max generations    = 300
 initial max depth  = 5
 max solution depth = 20
 keep percent       = 0.1
 mutation percent   = 0.45
 mate percent       = 0.45
-generate const node = 0
+generate const node = 1
 min constant       = 0
 max constant       = 100
 solution criteria  = 0

@@ -13,7 +13,8 @@
 #include "SymbolicRegressionSolver.hpp"
 #include "Config.hpp"
 
-#define OPTIMISE_CONFIG
+//#define OPTIMISE_CONFIG
+//#define MUTATE_MATE
 
 int amountOfSimulationsToPerform = 1;
 SymbolicRegressionSolver::Config config{};
@@ -21,22 +22,6 @@ Function fn{parse("+ 1 x").statement, "x"};
 int initialPoint = -10;
 int endPoint = 10;
 int stepSize = 1;
-
-std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config);
-std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config& config);
-
-void parseArguments(int argc, char *argv[]);
-void printValidFlags()
-{
-    std::cout << "-c <configuration-file> (TODO)\n";
-    std::cout << "-f <function>\n";
-    std::cout << "-i <initial-point>\n";
-    std::cout << "-e <end-point>\n";
-    std::cout << "-s <step size>\n";
-    std::cout << "-r <amount of times to redo simulation>\n";
-}
-
-//#define MUTATE_MATE
 
 struct Result
 {
@@ -52,6 +37,32 @@ struct Result
 constexpr const int AMOUNT_OF_THREADS = 4;
 std::vector<Result> solutions[AMOUNT_OF_THREADS];
 
+std::istream& operator>>(std::istream& is, SymbolicRegressionSolver::Config& config);
+std::ostream& operator<<(std::ostream& os, const SymbolicRegressionSolver::Config& config);
+
+void parseArguments(int argc, char *argv[]);
+void printValidFlags()
+{
+    std::cout << "-c <configuration-file> (TODO)\n";
+    std::cout << "-f <function>\n";
+    std::cout << "-i <initial-point>\n";
+    std::cout << "-e <end-point>\n";
+    std::cout << "-s <step size>\n";
+    std::cout << "-r <amount of times to redo simulation>\n";
+}
+
+
+
+template <class F> 
+void runSolver(int N, const PointList& p, SymbolicRegressionSolver::Config c, F f)
+{
+    SymbolicRegressionSolver solver{c, p};
+    for(int i = 0; i < N; ++i)
+    {
+        f(solver, solver.solve());
+        solver.reset();
+    }
+}
 
 template <class T>
 void optimiseConfig(size_t id, const PointList& points, const T& start, const T& end, const T& step)
@@ -65,7 +76,6 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 
     std::vector<size_t> temp;
 
-#ifdef OPTIMISE_CONFIG
 #ifdef MUTATE_MATE
     auto& var2 = solver.config().mutationPercent;
     for(var2 = start; var2 <= end; var2 += step)
@@ -78,39 +88,18 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
     {
         double currentAverage = 0;
         size_t totalSolutions = 0;
-#endif // OPTIMISE_CONFIG
 
         for(int i = 0; i < amountOfSimulationsToPerform; ++i)
         {
             auto solutions = solver.solve();
 
-            for(auto& solution : solutions)
-            {
-#ifndef OPTIMISE_CONFIG
-                std::cout << solver.currentGeneration() << ",";
-                std::cout << solution.fitnessLevel << ",";
-                std::cout << solution.mutated << ","; 
-                std::cout << solution.mated << '\n';
-#endif
-            }
-#ifdef OPTIMISE_CONFIG
             totalSolutions += solutions.size();
             currentAverage += solver.currentGeneration();
             temp.emplace_back(solver.currentGeneration());
-#endif // OPTIMISE_CONFIG
-            /*
-
-#ifndef MUTATE_MATE
-            ::solutions[id].emplace_back(variableToModify, solver.currentGeneration(), solutions.size());
-#else
-            ::solutions[id].emplace_back(var2, variableToModify, solver.currentGeneration(), solutions.size());
-#endif 
-*/
 
             solver.reset();
         }
         
-#ifdef OPTIMISE_CONFIG
         currentAverage /= amountOfSimulationsToPerform;
 
         double stdDev = 0;
@@ -127,7 +116,40 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
         solutions[id].emplace_back(var2, variableToModify, currentAverage, totalSolutions, stdDev);
 #endif 
     }
-#endif // OPTIMISE_CONFIG
+}
+
+void optimiseConfig(const PointList& points)
+{
+    std::vector<std::thread> threads;
+    for(int i = 0; i < AMOUNT_OF_THREADS; ++i)
+    {
+        constexpr double STEP_SIZE = 0.005;
+        double start = i * 1.0 / AMOUNT_OF_THREADS;
+        double end = (i + 1) * 1.0 / AMOUNT_OF_THREADS;
+  
+        threads.emplace_back([=]() { optimiseConfig(i, points, start, end,  STEP_SIZE); } );
+    }
+
+    for(auto& t : threads)
+    {
+        t.join();
+    }
+
+    std::vector<Result> sols;
+    for(auto& sol : solutions)
+    {
+        sols.insert(sols.end(), sol.begin(), sol.end());
+    }
+    std::sort(sols.begin(), sols.end(), [](const Result& r1, const Result& r2) { return r1.var < r2.var; });
+
+    for(auto& sol : sols)
+    {
+#ifndef MUTATE_MATE
+        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << ", " << sol.stdDev << '\n';
+#else
+        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << ", ", sol.stdDev << '\n';
+#endif // MUTATE_MATE
+    }
 }
 
 
@@ -151,37 +173,20 @@ int main(int argc, char *argv[])
         points.emplace_back(i, fn(map, i));
     }
 
-    std::vector<std::thread> threads;
-    for(int i = 0; i < AMOUNT_OF_THREADS; ++i)
-    {
-        constexpr double STEP_SIZE = 0.005;
-        double start = i * 1.0 / AMOUNT_OF_THREADS;
-        double end = (i + 1) * 1.0 / AMOUNT_OF_THREADS;
-  
-        threads.emplace_back([=]() { optimiseConfig(i, points, start, end,  STEP_SIZE); } );
-    }
-
-    for(auto& t : threads)
-    {
-        t.join();
-    }
-
-    std::vector<Result> sols;
-    for(auto& sol : solutions)
-    {
-        //std::cout << "size of sol is: " << sol.size() << '\n';
-        sols.insert(sols.end(), sol.begin(), sol.end());
-    }
-    std::sort(sols.begin(), sols.end(), [](const Result& r1, const Result& r2) { return r1.var < r2.var; });
-
-    for(auto& sol : sols)
-    {
-#ifndef MUTATE_MATE
-        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << ", " << sol.stdDev << '\n';
+#ifdef OPTIMISE_CONFIG
+    optimiseConfig(points);
 #else
-        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << ", ", sol.stdDev << '\n';
-#endif // MUTATE_MATE
-    }
+    runSolver(amountOfSimulationsToPerform, points, config, [](SymbolicRegressionSolver& solver, const SolutionList& sols)
+            {
+                for(auto& solution : sols)
+                {
+                    std::cout << solver.currentGeneration() << ",";
+                    std::cout << solution.fitnessLevel << ",";
+                    std::cout << solution.mutated << ","; 
+                    std::cout << solution.mated << '\n';
+                }
+            });
+#endif
 
     return 0;
 }
@@ -261,7 +266,6 @@ void parseArguments(int argc, char *argv[])
                         file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
                         file.open(filepath);
                         file >> config; // read the config
-                        std::cout << "loaded config:\n" << config << "\n";
                     } 
                     catch(boost::bad_lexical_cast& e)
                     {
