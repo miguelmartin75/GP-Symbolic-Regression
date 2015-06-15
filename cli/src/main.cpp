@@ -58,7 +58,7 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 {
     SymbolicRegressionSolver solver{config, points};
 #ifndef MUTATE_MATE
-    auto& variableToModify = solver.config().chanceToChangeConstant;
+    auto& variableToModify = solver.config().keepPercentage;
 #else
     auto& variableToModify = solver.config().matePercent;
 #endif
@@ -86,7 +86,6 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 
             for(auto& solution : solutions)
             {
-                temp.emplace_back(solver.currentGeneration());
 #ifndef OPTIMISE_CONFIG
                 std::cout << solver.currentGeneration() << ",";
                 std::cout << solution.fitnessLevel << ",";
@@ -97,6 +96,7 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 #ifdef OPTIMISE_CONFIG
             totalSolutions += solutions.size();
             currentAverage += solver.currentGeneration();
+            temp.emplace_back(solver.currentGeneration());
 #endif // OPTIMISE_CONFIG
             /*
 
@@ -111,17 +111,15 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
         }
         
 #ifdef OPTIMISE_CONFIG
-        if(totalSolutions != 0)
-            currentAverage /= totalSolutions;
+        currentAverage /= amountOfSimulationsToPerform;
 
         double stdDev = 0;
-        for(auto& i : temp)
+        for(auto i : temp)
         {
             auto diff = i - currentAverage;
             stdDev += diff * diff;
         }
-        if(totalSolutions != 0)
-            stdDev /= temp.size();
+        stdDev /= amountOfSimulationsToPerform;
 
 #ifndef MUTATE_MATE
         solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions, stdDev);
@@ -179,9 +177,9 @@ int main(int argc, char *argv[])
     for(auto& sol : sols)
     {
 #ifndef MUTATE_MATE
-        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << ", " << sol.stdDev << ", " << (sol.stdDev / std::sqrt(sol.totalSolutions)) << '\n';
+        std::cout << sol.var << ", " << sol.average << ", " << sol.totalSolutions << ", " << sol.stdDev << '\n';
 #else
-        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << ", ", sol.stdDev << ", " << (sol.stdDev / std::sqrt(sol.totalSolutions)) << '\n';
+        std::cout << sol.var << ", " << sol.var2 << ", " << sol.average << ", " << sol.totalSolutions << ", ", sol.stdDev << '\n';
 #endif // MUTATE_MATE
     }
 
@@ -263,6 +261,7 @@ void parseArguments(int argc, char *argv[])
                         file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
                         file.open(filepath);
                         file >> config; // read the config
+                        std::cout << "loaded config:\n" << config << "\n";
                     } 
                     catch(boost::bad_lexical_cast& e)
                     {
