@@ -1,5 +1,5 @@
 initial population = 100
-max generations    = 1000
+max generations    = 300
 initial max depth  = 5
 max solution depth = 20
 keep percent       = 0.1

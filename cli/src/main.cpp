@@ -58,7 +58,7 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
 {
     SymbolicRegressionSolver solver{config, points};
 #ifndef MUTATE_MATE
-    auto& variableToModify = solver.config().keepPercentage;
+    auto& variableToModify = solver.config().chanceToChangeConstant;
 #else
     auto& variableToModify = solver.config().matePercent;
 #endif
@@ -84,18 +84,19 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
         {
             auto solutions = solver.solve();
 
-#ifndef OPTIMISE_CONFIG
             for(auto& solution : solutions)
             {
+                temp.emplace_back(solver.currentGeneration());
+#ifndef OPTIMISE_CONFIG
                 std::cout << solver.currentGeneration() << ",";
                 std::cout << solution.fitnessLevel << ",";
                 std::cout << solution.mutated << ","; 
                 std::cout << solution.mated << '\n';
+#endif
             }
-#else
+#ifdef OPTIMISE_CONFIG
             totalSolutions += solutions.size();
             currentAverage += solver.currentGeneration();
-            temp.emplace_back(solver.currentGeneration());
 #endif // OPTIMISE_CONFIG
             /*
 
@@ -119,7 +120,8 @@ void optimiseConfig(size_t id, const PointList& points, const T& start, const T&
             auto diff = i - currentAverage;
             stdDev += diff * diff;
         }
-        stdDev /= amountOfSimulationsToPerform;
+        if(totalSolutions != 0)
+            stdDev /= temp.size();
 
 #ifndef MUTATE_MATE
         solutions[id].emplace_back(variableToModify, currentAverage, totalSolutions, stdDev);
