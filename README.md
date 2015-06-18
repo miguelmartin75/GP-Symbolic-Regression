@@ -1,7 +1,7 @@
 The goal: symbolic regression. This is just a repository to hold the code I am working on.
 
 Note it is not necessary to compile the GUI yourself, I've provided a pre-compiled version
-[here](https://github.com/miguelmartin75/GP-Symbolic-Regression/releases/download/0.1/viewer.app.zip).
+[here](https://github.com/miguelmartin75/GP-Symbolic-Regression/releases/download/0.1/viewer.app.zip). I am not sure this works on other systems other than my own, hence why I reccomend compiling it for yourself.
 
 # How it's structured
 
@@ -30,3 +30,4 @@ You require `cmake` to be installed.
     - `./compile.sh cli`
 3. Compile the viewer
     - Open up the .pro file in QtCreator
+
