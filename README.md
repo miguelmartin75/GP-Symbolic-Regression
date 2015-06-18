@@ -15,14 +15,12 @@ Note it is not necessary to compile the GUI yourself, I've provided a pre-compil
 # Dependencies
 
 - boost is required to compile
-- a compiler that supports C++11.
-    - GCC 4.8+ should work; clang also works, I'm willing to bet 3.0 or 3.1 can compile the code.
+- a compiler that supports C++11
+    - GCC 4.8+ should work; clang also works, I'm willing to bet 3.0 or 3.1 can compile the code
 - Qt for the GUI
-- `cmake` for to generate makefiles (or protect files) to compile
+- `cmake` to generate makefiles (or protect files) to compile
 
 # How to compile
-
-You require `cmake` to be installed.
 
 1. Compile the 'library':
     - `./compile.sh lib`
@@ -30,4 +28,3 @@ You require `cmake` to be installed.
     - `./compile.sh cli`
 3. Compile the viewer
     - Open up the .pro file in QtCreator
-
