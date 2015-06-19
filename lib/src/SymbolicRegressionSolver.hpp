@@ -34,15 +34,15 @@ public:
         
         Value solutionCriterea = 0; /* 0 means fully successful */
 
-        double chanceToChangeConstant = 0.3;
-        double chanceToChangeVar = 0.4;
+        double chanceToChangeConstant = 0;
+        double chanceToChangeVar = 0;
          
         enum class NearestNeighbourOption
         {
             ALWAYS_USE,
             NEVER_USE,
             RANDOM
-        } nearestNeighbourOption = NearestNeighbourOption::RANDOM;
+        } nearestNeighbourOption = NearestNeighbourOption::ALWAYS_USE;
 
         double chanceToUseNearestNeighbour = 0.7;
         Value stepSize = 1; /* step for nearest neighbour */

@@ -22,10 +22,12 @@ GeneratePointDialog::GeneratePointDialog(QWidget *parent, PointList& points) :
     ui.stepSizeLineEdit->setValidator(v);
 }
 
+#include <QDebug>
 
 void GeneratePointDialog::on_addPointsButton_clicked()
 {
-    Function function{ui.functionLineEdit->text().toStdString()};
+    qDebug() << "Add Points clicked";
+    Function function{parse(ui.functionLineEdit->text().toStdString()).statement};
     updateVars();
 
     bool failed = false;
@@ -50,7 +52,7 @@ void GeneratePointDialog::on_addPointsButton_clicked()
 
     if(failed)
     {
-        errorDialog("Failed to add function as intercepts with current points");
+        errorDialog("Failed to add function as it intercepts with current points");
         return;
     }
 

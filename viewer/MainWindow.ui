@@ -44,7 +44,6 @@
         <height>0</height>
        </size>
       </property>
-      <zorder>verticalWidget</zorder>
      </widget>
     </item>
     <item>
@@ -177,8 +176,8 @@
     <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuSimulate"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuSimulate"/>
   </widget>
   <action name="actionStep">
    <property name="text">

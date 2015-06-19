@@ -61,6 +61,7 @@ void PointListEditDialog::on_editButton_clicked()
 
 void PointListEditDialog::on_removeButton_clicked()
 {
+    if(ui.listWidget->count() == 0) return;
     auto indexToRemove = ui.listWidget->currentIndex().row();
     editPoints([&]
     {

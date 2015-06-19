@@ -12,7 +12,7 @@ CONFIG += c++11
 TARGET = viewer
 TEMPLATE = app
 
-LIBS += -L/Volumes/HDD/Programming/repos/school/gp/lib/build -lgp_symb_reg_d
+LIBS += -L/Volumes/HDD/Programming/repos/school/gp/lib/build -lgp_symb_reg_s
 INCLUDEPATH += ../lib/src
 INCLUDEPATH += /usr/local/include
 
